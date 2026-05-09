@@ -27,7 +27,7 @@ export default function MyNavber() {
       <div className="flex items-center gap-2 sm:gap-4 flex-1 min-w-0">
         <SidebarTrigger className="h-10 w-10 sm:h-12 sm:w-12 bg-[#6C63FF]/10 cursor-pointer hover:bg-[#6C63FF]/20 text-[#6C63FF] rounded-xl shadow-none border-0 [&_svg]:h-5 sm:[&_svg]:h-6 [&_svg]:w-5 sm:[&_svg]:w-6 shrink-0 transition-colors" />
         <div className="flex flex-col min-w-0">
-          <h1 className="text-lg sm:text-2xl font-bold text-[#1A1D2E] truncate tracking-tight">
+          <h1 className="text-lg sm:text-2xl font-medium text-[#1A1D2E] truncate tracking-tight">
             {getPageTitle()}
           </h1>
           <p className="text-[10px] sm:text-xs text-[#64748B] font-medium hidden xs:block">
@@ -53,14 +53,14 @@ export default function MyNavber() {
 
         <div onClick={() => router.push("/profile")} className="flex items-center gap-2 sm:gap-4 cursor-pointer group pl-2 sm:pl-4 border-l border-[#EEF2F9]">
           <div className="text-right hidden md:block">
-            <p className="text-sm font-bold text-[#1A1D2E] leading-none mb-1.5 group-hover:text-[#6C63FF] transition-colors">Rasel Parvez</p>
-            <span className="px-2 py-0.5 rounded-full bg-[#6C63FF]/10 text-[#6C63FF] text-[10px] font-bold uppercase tracking-wider">
+            <p className="text-sm font-medium text-[#1A1D2E] leading-none mb-1.5 group-hover:text-[#6C63FF] transition-colors">Rasel Parvez</p>
+            <span className="px-2 py-0.5 rounded-full bg-[#6C63FF]/10 text-[#6C63FF] text-[10px] font-medium uppercase tracking-wider">
               {isProvider ? "Provider" : "Admin"}
             </span>
           </div>
           <Avatar className="h-10 w-10 sm:h-12 sm:w-12 rounded-xl border-2 border-transparent group-hover:border-[#6C63FF]/20 shadow-sm transition-all overflow-hidden bg-[#6C63FF]/10">
             <AvatarImage src="https://www.perfocal.com/blog/content/images/size/w960/2021/01/Perfocal_17-11-2019_TYWFAQ_100_standard-3.jpg" alt="Rasel Parvez" className="object-cover" />
-            <AvatarFallback className="rounded-xl bg-[#6C63FF] text-white text-xs sm:text-base font-bold">RP</AvatarFallback>
+            <AvatarFallback className="rounded-xl bg-[#6C63FF] text-white text-xs sm:text-base font-medium">RP</AvatarFallback>
           </Avatar>
         </div>
 

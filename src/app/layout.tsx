@@ -34,12 +34,10 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable}  antialiased h-screen`}
       >
-        {/* <ProtectedRoute> */}
         <ClientLayout>
           {children}
           <Toaster />
         </ClientLayout>
-        {/* </ProtectedRoute> */}
       </body>
     </html>
   );

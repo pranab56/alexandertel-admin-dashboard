@@ -23,7 +23,7 @@ export default function AppointmentDetails() {
 
       {/* Header */}
       <div className="space-y-2">
-        <h1 className="text-2xl font-bold text-gray-900">
+        <h1 className="text-2xl font-medium text-gray-900">
           Manage Schedule & Availability
         </h1>
         <p className="text-gray-500">
@@ -55,7 +55,7 @@ export default function AppointmentDetails() {
           <InfoItem label="DATE & TIME" value="May 24, 2024 . 10:00 AM" />
           <InfoItem label="TIMEZONE" value="Eastern Standard Time (EST)" />
           <div className="space-y-1.5">
-            <span className="text-[11px] font-bold text-gray-400 tracking-wider uppercase">
+            <span className="text-[11px] font-medium text-gray-400 tracking-wider uppercase">
               SESSION ACCESS
             </span>
             <div>
@@ -99,7 +99,7 @@ function InfoCard({
     >
       <Card className="h-full border-none shadow-sm hover:shadow-md transition-shadow bg-white rounded-2xl overflow-hidden">
         <CardHeader className=" px-6">
-          <CardTitle className="text-lg font-bold text-gray-800">
+          <CardTitle className="text-lg font-medium text-gray-800">
             {title}
           </CardTitle>
         </CardHeader>
@@ -114,7 +114,7 @@ function InfoCard({
 function InfoItem({ label, value }: { label: string; value: string }) {
   return (
     <div className="space-y-1.5">
-      <h3 className="text-[11px] font-bold text-gray-400 tracking-wider uppercase">
+      <h3 className="text-[11px] font-medium text-gray-400 tracking-wider uppercase">
         {label}
       </h3>
       <p className="text-[15px] font-medium text-gray-700 leading-relaxed">

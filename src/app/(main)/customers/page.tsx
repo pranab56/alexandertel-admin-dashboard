@@ -9,7 +9,6 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
 } from "@/components/ui/dialog";
 import {
   Table,
@@ -19,166 +18,279 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { CreditCard, Gift, Mail, MapPin, Phone } from "lucide-react";
-
-interface Customer {
-  id: string;
-  name: string;
-  initials: string;
-  email: string;
-  walletBalance: string;
-  loyaltyPoints: number;
-}
-
-const mockCustomers: Customer[] = Array(9).fill({
-  id: "#45920",
-  name: "Alex Rivera",
-  initials: "AR",
-  email: "alex.rivera@example.com",
-  walletBalance: "€45.00",
-  loyaltyPoints: 45,
-});
+import { CreditCard, Eye, Gift, Mail, MapPin, Phone, Trash2 } from "lucide-react";
+import {
+  useGetAllCustomersQuery,
+  useDeleteCustomerMutation,
+  useUpdateStatusMutation
+} from "@/features/customers/customersApi";
+import { useState } from "react";
+import Image from "next/image";
+import toast from "react-hot-toast";
 
 export default function Customers() {
+  const [page, setPage] = useState(1);
+  const { data: customersResponse, isLoading } = useGetAllCustomersQuery({ page, limit: 10 });
+  const [deleteCustomer] = useDeleteCustomerMutation();
+  const [updateStatus] = useUpdateStatusMutation();
+
+  const [selectedCustomer, setSelectedCustomer] = useState<any>(null);
+  const [isDetailsOpen, setIsDetailsOpen] = useState(false);
+
+  const customers = customersResponse?.data?.data || [];
+  const meta = customersResponse?.data?.meta || { total: 0, limit: 10, page: 1, totalPage: 1 };
+
+  const handleToggleStatus = async (id: string) => {
+    try {
+      await updateStatus(id).unwrap();
+      toast.success("Status updated successfully");
+    } catch (error: any) {
+      toast.error(error?.data?.message || "Failed to update status");
+    }
+  };
+
+  const handleDelete = async (id: string) => {
+    if (confirm("Are you sure you want to delete this customer?")) {
+      try {
+        await deleteCustomer(id).unwrap();
+        toast.success("Customer deleted successfully");
+      } catch (error: any) {
+        toast.error(error?.data?.message || "Failed to delete customer");
+      }
+    }
+  };
+
   return (
     <div className="space-y-8 pb-10">
       {/* Header */}
       <div className="flex flex-col gap-1">
-        <h1 className="text-2xl font-bold text-gray-900">Customers Management</h1>
+        <h1 className="text-2xl font-medium text-gray-900">Customers Management</h1>
         <p className="text-gray-500">Manage and view your customer directory and loyalty programs.</p>
       </div>
 
       {/* Data Table */}
-      <div className="bg-white rounded-[32px] shadow-sm border border-gray-100 overflow-hidden">
+      <div className="bg-white rounded-lg shadow-sm border border-gray-100 overflow-hidden min-h-[400px]">
         <Table>
           <TableHeader>
             <TableRow className="hover:bg-transparent border-gray-50 bg-[#F8F9FC]">
-              <TableHead className="py-6 px-8 text-gray-900 font-bold h-14 text-[15px]">Customer Name</TableHead>
-              <TableHead className="py-6 text-gray-900 font-bold h-14 text-[15px]">Email Address</TableHead>
-              <TableHead className="py-6 text-gray-900 font-bold h-14 text-[15px]">Wallet Balance</TableHead>
-              <TableHead className="py-6 text-gray-900 font-bold h-14 text-[15px]">Loyalty Points</TableHead>
-              <TableHead className="py-6 px-8 text-right text-gray-900 font-bold h-14 text-[15px]">Actions</TableHead>
+              <TableHead className="py-6 px-8 text-gray-900 font-medium h-14 text-[15px]">Customer</TableHead>
+              <TableHead className="py-6 text-gray-900 font-medium h-14 text-[15px]">Email Address</TableHead>
+              <TableHead className="py-6 text-gray-900 font-medium h-14 text-[15px]">Status</TableHead>
+              <TableHead className="py-6 text-gray-900 font-medium h-14 text-[15px]">Loyalty Points</TableHead>
+              <TableHead className="py-6 px-8 text-right text-gray-900 font-medium h-14 text-[15px]">Actions</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
-            {mockCustomers.map((customer, idx) => (
-              <TableRow key={idx} className="hover:bg-gray-50/50 border-gray-50">
-                <TableCell className="py-5 px-8 flex items-center gap-4">
-                  <div className="w-12 h-12 bg-[#F2F2F2] rounded-full flex items-center justify-center shrink-0">
-                    <span className="font-bold text-gray-700 text-[15px]">{customer.initials}</span>
-                  </div>
-                  <div className="flex flex-col">
-                    <span className="font-bold text-gray-900 text-[15px]">{customer.name}</span>
-                    <span className="text-gray-500 font-medium text-[13px]">ID: {customer.id}</span>
-                  </div>
-                </TableCell>
-                <TableCell className="py-5 font-medium text-gray-600 text-[15px]">{customer.email}</TableCell>
-                <TableCell className="py-5 font-medium text-gray-600 text-[15px]">{customer.walletBalance}</TableCell>
-                <TableCell className="py-5">
-                  <Badge className="bg-[#F2F2F2] text-gray-700 hover:bg-[#F2F2F2] px-4 py-1.5 rounded-full font-bold border-none shadow-none text-[14px]">
-                    {customer.loyaltyPoints}
-                  </Badge>
-                </TableCell>
-                <TableCell className="py-5 px-8 text-right">
-                  <Dialog>
-                    <DialogTrigger asChild>
-                      <Button className="bg-secondary hover:bg-secondary/90 text-white rounded-xl px-6 font-bold h-10 transition-transform active:scale-[0.98]">
-                        View Profile
-                      </Button>
-                    </DialogTrigger>
-                    <DialogContent className="sm:max-w-[500px] p-0 rounded-[24px] border-none overflow-hidden gap-0">
-                      <DialogHeader className="p-6 pb-4 border-b border-gray-100 bg-[#F8F9FC]">
-                        <DialogTitle className="text-[20px] font-bold text-gray-900">Customer Profile</DialogTitle>
-                      </DialogHeader>
-                      <div className="p-8 space-y-8">
-                        {/* Profile Header Block */}
-                        <div className="flex items-center gap-6">
-                          <div className="w-20 h-20 bg-primary/10 rounded-full flex items-center justify-center shrink-0">
-                            <span className="font-bold text-primary text-[28px]">{customer.initials}</span>
-                          </div>
-                          <div>
-                            <h2 className="text-[22px] font-bold text-gray-900">{customer.name}</h2>
-                            <p className="text-gray-500 font-medium mt-1">Customer ID: {customer.id}</p>
-                          </div>
-                        </div>
-
-                        {/* Details List */}
-                        <div className="space-y-4">
-                          <div className="flex items-center gap-4">
-                            <div className="w-10 h-10 bg-[#F2F2F2] rounded-xl flex items-center justify-center shrink-0">
-                              <Mail className="w-5 h-5 text-gray-600" />
-                            </div>
-                            <div className="flex flex-col">
-                              <span className="text-[13px] text-gray-500 font-medium">Email Address</span>
-                              <span className="font-bold text-gray-900 text-[15px]">{customer.email}</span>
-                            </div>
-                          </div>
-                          <div className="flex items-center gap-4">
-                            <div className="w-10 h-10 bg-[#F2F2F2] rounded-xl flex items-center justify-center shrink-0">
-                              <Phone className="w-5 h-5 text-gray-600" />
-                            </div>
-                            <div className="flex flex-col">
-                              <span className="text-[13px] text-gray-500 font-medium">Phone Number</span>
-                              <span className="font-bold text-gray-900 text-[15px]">+1 (555) 123-4567</span>
-                            </div>
-                          </div>
-                          <div className="flex items-center gap-4">
-                            <div className="w-10 h-10 bg-[#F2F2F2] rounded-xl flex items-center justify-center shrink-0">
-                              <MapPin className="w-5 h-5 text-gray-600" />
-                            </div>
-                            <div className="flex flex-col">
-                              <span className="text-[13px] text-gray-500 font-medium">Shipping Address</span>
-                              <span className="font-bold text-gray-900 text-[15px]">123 Business Avenue, Suite 100</span>
-                            </div>
-                          </div>
-                        </div>
-
-                        {/* Balance & Loyalty Cards */}
-                        <div className="grid grid-cols-2 gap-4 pt-4 border-t border-gray-100">
-                          <div className="bg-[#F8F9FC] p-4 rounded-2xl flex flex-col gap-2">
-                            <CreditCard className="w-6 h-6 text-primary" />
-                            <span className="text-[13px] text-gray-500 font-medium">Wallet Balance</span>
-                            <span className="text-[20px] font-bold text-gray-900">{customer.walletBalance}</span>
-                          </div>
-                          <div className="bg-[#FFF8E7] p-4 rounded-2xl flex flex-col gap-2">
-                            <Gift className="w-6 h-6 text-[#FFA500]" />
-                            <span className="text-[13px] text-[#A67E33] font-medium">Loyalty Points</span>
-                            <span className="text-[20px] font-bold text-[#D98C00]">{customer.loyaltyPoints}</span>
-                          </div>
-                        </div>
-
-                      </div>
-                      <DialogFooter className="p-6 pt-0 sm:justify-center gap-3">
-                        <DialogClose asChild>
-                          <Button variant="outline" className="w-full h-12 rounded-xl bg-[#F2F2F2] border-none font-bold text-gray-700 hover:bg-[#E5E5E5] transition-colors">
-                            Close Profile
-                          </Button>
-                        </DialogClose>
-                      </DialogFooter>
-                    </DialogContent>
-                  </Dialog>
+            {isLoading ? (
+              Array.from({ length: 5 }).map((_, i) => (
+                <TableRow key={i} className="animate-pulse">
+                  <TableCell colSpan={5} className="h-20 bg-gray-50/50" />
+                </TableRow>
+              ))
+            ) : customers.length === 0 ? (
+              <TableRow>
+                <TableCell colSpan={5} className="h-60 text-center text-gray-400 font-medium font-medium">
+                  No customers found.
                 </TableCell>
               </TableRow>
-            ))}
+            ) : (
+              customers.map((customer: any) => (
+                <TableRow key={customer._id} className="hover:bg-gray-50/50 border-gray-50 transition-colors">
+                  <TableCell className="py-5 px-8 flex items-center gap-4">
+                    <div className="w-12 h-12 bg-gray-50 border border-gray-100 rounded-full overflow-hidden relative shrink-0">
+                      <Image
+                        src={customer.profile || "/placeholder-user.jpg"}
+                        alt={customer.userName}
+                        fill
+                        className="object-cover"
+                      />
+                    </div>
+                    <div className="flex flex-col">
+                      <span className="font-medium text-gray-900 text-[15px]">{customer.userName}</span>
+                      <span className="text-gray-500 font-medium text-[13px]">Verified: {customer.verified ? 'Yes' : 'No'}</span>
+                    </div>
+                  </TableCell>
+                  <TableCell className="py-5 font-medium text-gray-600 text-[15px]">{customer.email}</TableCell>
+                  <TableCell className="py-5">
+                    <Badge
+                      onClick={() => handleToggleStatus(customer._id)}
+                      className={cn(
+                        "px-4 py-1.5 rounded-full font-medium border-none shadow-none text-[13px] cursor-pointer transition-all active:scale-95",
+                        customer.accountInformation?.status
+                          ? "bg-[#E6F9F0] text-[#2DC766] hover:bg-[#D5F5E3]"
+                          : "bg-[#FFEBEB] text-[#E74C3C] hover:bg-[#FADBD8]"
+                      )}
+                    >
+                      {customer.accountInformation?.status ? 'Active' : 'Inactive'}
+                    </Badge>
+                  </TableCell>
+                  <TableCell className="py-5">
+                    <Badge className="bg-[#F2F2F2] text-gray-700 hover:bg-[#F2F2F2] px-4 py-1.5 rounded-full font-medium border-none shadow-none text-[14px]">
+                      {customer.loyaltyPoints} pts
+                    </Badge>
+                  </TableCell>
+                  <TableCell className="py-5 px-8 text-right">
+                    <div className="flex justify-end gap-2">
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => {
+                          setSelectedCustomer(customer);
+                          setIsDetailsOpen(true);
+                        }}
+                        className="h-9 w-9 text-gray-400 hover:text-primary hover:bg-primary/5 transition-colors"
+                        title="View Details"
+                      >
+                        <Eye className="w-5 h-5" />
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => handleDelete(customer._id)}
+                        className="h-9 w-9 text-gray-400 hover:text-red-500 hover:bg-red-50 transition-colors"
+                        title="Delete"
+                      >
+                        <Trash2 className="w-5 h-5" />
+                      </Button>
+                    </div>
+                  </TableCell>
+                </TableRow>
+              ))
+            )}
           </TableBody>
         </Table>
 
         {/* Pagination */}
         <div className="p-8 border-t border-gray-50 flex flex-col md:flex-row items-center justify-between gap-4 bg-white">
-          <p className="text-gray-500 font-medium">Showing 4 of 248 Orders</p>
+          <p className="text-gray-500 font-medium">Showing {customers.length} of {meta.total} Customers</p>
           <div className="flex items-center gap-2">
-            <Button variant="ghost" className="text-gray-400 font-bold hover:bg-transparent text-[15px]">Prev</Button>
+            <Button
+              variant="ghost"
+              className="text-gray-400 font-medium hover:bg-transparent text-[15px]"
+              disabled={meta.page === 1}
+              onClick={() => setPage(page - 1)}
+            >
+              Prev
+            </Button>
             <div className="flex items-center gap-2 px-2">
-              <Button className="w-10 h-10 p-0 rounded-lg bg-primary text-white font-bold hover:bg-primary/90 shadow-md">1</Button>
-              <Button variant="outline" className="w-10 h-10 p-0 rounded-lg border-gray-100 text-gray-600 font-bold hover:bg-gray-50">2</Button>
-              <Button variant="outline" className="w-10 h-10 p-0 rounded-lg border-gray-100 text-gray-600 font-bold hover:bg-gray-50">3</Button>
-              <span className="text-gray-400 px-1 font-bold">...</span>
-              <Button variant="outline" className="w-10 h-10 p-0 rounded-lg border-gray-100 text-gray-600 font-bold hover:bg-gray-50">10</Button>
+              {Array.from({ length: meta.totalPage }, (_, i) => i + 1).map((pageNum) => (
+                <Button
+                  key={pageNum}
+                  onClick={() => setPage(pageNum)}
+                  className={cn(
+                    "w-10 h-10 p-0 rounded-lg font-medium transition-all",
+                    meta.page === pageNum
+                      ? "bg-primary text-white hover:bg-primary/90 shadow-md"
+                      : "bg-white border border-gray-100 text-gray-600 hover:bg-gray-50 hover:border-gray-200"
+                  )}
+                >
+                  {pageNum}
+                </Button>
+              ))}
             </div>
-            <Button variant="ghost" className="text-gray-400 font-bold hover:bg-transparent text-[15px]">Next</Button>
+            <Button
+              variant="ghost"
+              className="text-gray-400 font-medium hover:bg-transparent text-[15px]"
+              disabled={meta.page === meta.totalPage}
+              onClick={() => setPage(page + 1)}
+            >
+              Next
+            </Button>
           </div>
         </div>
       </div>
+
+      {/* Profile Dialog */}
+      <Dialog open={isDetailsOpen} onOpenChange={setIsDetailsOpen}>
+        <DialogContent className="sm:max-w-xl p-0 rounded-lg border-none overflow-hidden gap-0">
+          <DialogHeader className="p-6 pb-4 border-b border-gray-100 bg-[#F8F9FC]">
+            <DialogTitle className="text-xl font-medium text-gray-900">Customer Profile</DialogTitle>
+          </DialogHeader>
+          {selectedCustomer && (
+            <div className="p-8 space-y-8">
+              {/* Profile Header Block */}
+              <div className="flex items-center gap-6">
+                <div className="w-24 h-24 bg-gray-50 border-2 border-primary/10 rounded-full overflow-hidden relative shrink-0 shadow-sm">
+                  <Image
+                    src={selectedCustomer.profile || "/placeholder-user.jpg"}
+                    alt={selectedCustomer.userName}
+                    fill
+                    className="object-cover"
+                  />
+                </div>
+                <div>
+                  <h2 className="text-2xl font-medium text-gray-900 tracking-tight">{selectedCustomer.userName}</h2>
+                  <div className="flex items-center gap-2 mt-1">
+                    <p className="text-gray-500 font-medium">Customer ID:</p>
+                    <code className="bg-gray-100 px-2 py-0.5 rounded text-[13px] font-medium text-gray-700">{selectedCustomer._id}</code>
+                  </div>
+                </div>
+              </div>
+
+              {/* Details List */}
+              <div className="grid grid-cols-2 gap-y-6 gap-x-8">
+                <div className="flex items-center gap-4">
+                  <div className="w-10 h-10 bg-[#F2F2F2] rounded-xl flex items-center justify-center shrink-0 shadow-sm">
+                    <Mail className="w-5 h-5 text-gray-600" />
+                  </div>
+                  <div className="flex flex-col">
+                    <span className="text-[12px] text-gray-400 font-medium uppercase tracking-wider">Email Address</span>
+                    <span className="font-medium text-gray-900 text-[15px] truncate max-w-[180px]">{selectedCustomer.email}</span>
+                  </div>
+                </div>
+                <div className="flex items-center gap-4">
+                  <div className="w-10 h-10 bg-[#F2F2F2] rounded-xl flex items-center justify-center shrink-0 shadow-sm">
+                    <Phone className="w-5 h-5 text-gray-600" />
+                  </div>
+                  <div className="flex flex-col">
+                    <span className="text-[12px] text-gray-400 font-medium uppercase tracking-wider">Phone Number</span>
+                    <span className="font-medium text-gray-900 text-[15px]">{selectedCustomer.phoneNumber || '+1 (555) 000-0000'}</span>
+                  </div>
+                </div>
+                <div className="flex items-center gap-4">
+                  <div className="w-10 h-10 bg-[#F2F2F2] rounded-xl flex items-center justify-center shrink-0 shadow-sm">
+                    <MapPin className="w-5 h-5 text-gray-600" />
+                  </div>
+                  <div className="flex flex-col">
+                    <span className="text-[12px] text-gray-400 font-medium uppercase tracking-wider">Location</span>
+                    <span className="font-medium text-gray-900 text-[15px]">{selectedCustomer.location || 'Dhaka'}</span>
+                  </div>
+                </div>
+                <div className="flex items-center gap-4">
+                  <div className="w-10 h-10 bg-[#F2F2F2] rounded-xl flex items-center justify-center shrink-0 shadow-sm">
+                    <Badge className={cn("p-1 rounded-sm", selectedCustomer.verified ? "bg-green-100 text-green-700" : "bg-red-100 text-red-700")}>
+                      {selectedCustomer.verified ? 'Verified' : 'Unverified'}
+                    </Badge>
+                  </div>
+                  <div className="flex flex-col">
+                    <span className="text-[12px] text-gray-400 font-medium uppercase tracking-wider">Verification</span>
+                    <span className="font-medium text-gray-900 text-[15px]">{selectedCustomer.verified ? 'Complete' : 'Pending'}</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Balance & Loyalty Cards */}
+              <div className="grid grid-cols-2 gap-4 pt-6 border-t border-gray-100">
+                <div className="bg-[#F8F9FC] p-4 rounded-2xl flex flex-col gap-2 border border-blue-50/50">
+                  <CreditCard className="w-6 h-6 text-primary" />
+                  <span className="text-[13px] text-gray-500 font-medium uppercase">Wallet Balance</span>
+                  <span className="text-2xl font-medium text-gray-900">€0.00</span>
+                </div>
+                <div className="bg-[#FFF8E7] p-4 rounded-2xl flex flex-col gap-2 border border-amber-50/50">
+                  <Gift className="w-6 h-6 text-[#FFA500]" />
+                  <span className="text-[13px] text-[#A67E33] font-medium uppercase">Loyalty Points</span>
+                  <span className="text-2xl font-medium text-[#D98C00]">{selectedCustomer.loyaltyPoints}</span>
+                </div>
+              </div>
+
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
+}
+
+function cn(...inputs: any[]) {
+  return inputs.filter(Boolean).join(" ");
 }

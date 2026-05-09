@@ -3,17 +3,20 @@
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { useForgotEmailMutation } from "@/features/auth/authApi";
 import { cn } from "@/lib/utils";
 import { ArrowLeft, ArrowRight } from "lucide-react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { FormEvent, useState } from "react";
 import toast from "react-hot-toast";
 
 export default function ForgotPassword() {
   const [email, setEmail] = useState("");
   const [errors, setErrors] = useState<{ email?: string }>({});
-  const [isLoading, setIsLoading] = useState(false);
   const [isSent, setIsSent] = useState(false);
+  const [forgotPassword, { isLoading }] = useForgotEmailMutation();
+  const router = useRouter();
 
   const validate = () => {
     const newErrors: { email?: string } = {};
@@ -33,18 +36,17 @@ export default function ForgotPassword() {
       return;
     }
 
-    setIsLoading(true);
     try {
-      // Simulate API call
-      await new Promise((resolve) => setTimeout(resolve, 1500));
-      setIsSent(true);
-      toast.success("Reset link sent to your email!");
-    } catch (error) {
-      console.error("Reset error:", error);
-      toast.error("An error occurred. Please try again.");
-    } finally {
-      setIsLoading(false);
+      const res = await forgotPassword({ email: email }).unwrap();
+      if (res.success) {
+        setIsSent(true);
+        toast.success(res.message);
+      }
+    } catch (error: any) {
+      console.error("Reset error:", error?.message);
+      toast.error(error?.message);
     }
+
   };
 
   return (
@@ -64,10 +66,10 @@ export default function ForgotPassword() {
               </p>
               <Button
                 variant="ghost"
-                onClick={() => setIsSent(false)}
+                onClick={() => router.push(`/auth/verify-email?email=${email}`)}
                 className="text-[#1D68D5] hover:text-[#1A5BBF] font-medium text-base"
               >
-                Resend link
+                Verify Email
               </Button>
               <div className="mt-8">
                 <Link href="/login" className="text-[#1D68D5] hover:underline font-medium text-base flex items-center justify-center gap-2">

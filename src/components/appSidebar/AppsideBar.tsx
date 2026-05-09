@@ -22,6 +22,7 @@ import {
   ChevronDown,
   FileText,
   LayoutGrid,
+  List,
   LogOut,
   LucideIcon,
   RefreshCcw,
@@ -32,10 +33,12 @@ import {
   Wallet,
   Wrench
 } from "lucide-react";
+import Image from 'next/image';
 
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useState } from "react";
+import { removeAuthCookie } from "@/app/actions/auth";
 
 type MenuItem = {
   name: string;
@@ -49,18 +52,21 @@ const clientMenuItems: MenuItem[] = [
   { name: "Orders", path: "/orders", icon: ShoppingBag },
   { name: "Repairs", path: "/repairs", icon: Wrench },
   { name: "Products", path: "/products", icon: Box },
+  { name: "Categories", path: "/categories", icon: List },
+  { name: "Services", path: "/services", icon: Wrench },
+  { name: "Shipping", path: "/shipping", icon: Truck },
   { name: "Inventory", path: "/inventory", icon: RefreshCcw },
   { name: "Customers", path: "/customers", icon: Users },
   { name: "Wallet & Payments", path: "/wallet", icon: Wallet },
-  { name: "Shipping $ Pickup", path: "/shipping", icon: Truck },
-  { name: "Loyalty & Promo", path: "/loyalty", icon: Award },
+  { name: "Coupon", path: "/coupon", icon: Award },
   {
     name: "CMS",
     path: "/cms",
     icon: FileText,
     children: [
       { name: "Privacy Policy", path: "/cms/privacy-policy" },
-      { name: "Terms & Conditions", path: "/cms/terms-and-conditions" }
+      { name: "Terms & Conditions", path: "/cms/terms-and-conditions" },
+      { name: "Banners", path: "/cms/banners" }
     ]
   },
   { name: "Profile", path: "/profile", icon: User },
@@ -84,8 +90,9 @@ export default function AppSideBar() {
     return pathname.startsWith(path);
   };
 
-  const handleLogout = () => {
+  const handleLogout = async () => {
     if (isMobile) setOpenMobile(false);
+    await removeAuthCookie();
     router.push("/auth/login");
   };
 
@@ -109,13 +116,13 @@ export default function AppSideBar() {
               "bg-white flex items-center justify-center transition-all duration-300 aspect-square",
               isCollapsed ? "w-10 h-10 rounded-lg" : "w-32 h-32 rounded-[32px]"
             )}>
-              <div className="relative w-full h-full p-6 flex items-center justify-center">
-                <div className="w-16 h-16 border-[6px] border-black rounded-full flex items-center justify-center rotate-[-10deg]">
-                  <span className="text-black text-4xl font-black italic tracking-tighter">M</span>
-                </div>
-                {/* Decorative orbit ring */}
-                <div className="absolute inset-4 border-2 border-black/10 rounded-full rotate-[45deg] scale-110"></div>
-              </div>
+              <Image
+                src="/icons/logo.png"
+                alt="Logo"
+                width={1000}
+                height={1000}
+                className='w-full h-full'
+              />
             </div>
           </Link>
         </SidebarHeader>

@@ -1,310 +1,351 @@
 "use client";
 
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
   DialogFooter,
   DialogHeader,
   DialogTitle,
+  DialogTrigger,
+  DialogClose,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { AlertTriangle, Gift, PencilLine, Plus, X } from "lucide-react";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Switch } from "@/components/ui/switch";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import { cn } from "@/lib/utils";
+import { Plus, Search, Trash2, Truck, AlertCircle, Info } from "lucide-react";
 import { useState } from "react";
+import { useGetAllShippingQuery, useCreateShippingMutation, useDeleteShippingMutation } from "@/features/shipping/shippingApi";
+import toast from "react-hot-toast";
 
-export default function Shipping() {
-  const [freeShippingCities, setFreeShippingCities] = useState(["Processing"]);
-  const [sameDayCities, setSameDayCities] = useState(["Groenlo", "Lichtenvoorde", "Aalten", "Bredevoort"]);
-  const [prices, setPrices] = useState({ standardPickup: 5.00, standardDelivery: 5.00, deliverySurcharge: 5.00 });
+export default function ShippingPage() {
+  const [searchTerm, setSearchTerm] = useState("");
+  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [selectedShippingId, setSelectedShippingId] = useState<string | null>(null);
 
-  const [isFreeCityModalOpen, setIsFreeCityModalOpen] = useState(false);
-  const [isSameDayCityModalOpen, setIsSameDayCityModalOpen] = useState(false);
-  const [isPriceModalOpen, setIsPriceModalOpen] = useState(false);
+  // Form State
+  const [formData, setFormData] = useState({
+    name: "",
+    description: "",
+    type: "paid",
+    baseCost: "",
+    perKmCost: "",
+    minOrderAmount: "",
+    isActive: true,
+  });
 
-  const [newCityInput, setNewCityInput] = useState("");
-  const [editPricesInput, setEditPricesInput] = useState({ ...prices });
+  const { data: shippingResponse, isLoading } = useGetAllShippingQuery({});
+  const [createShipping, { isLoading: isCreating }] = useCreateShippingMutation();
+  const [deleteShipping, { isLoading: isDeleting }] = useDeleteShippingMutation();
 
-  const handleAddFreeCity = () => {
-    if (newCityInput.trim() && !freeShippingCities.includes(newCityInput.trim())) {
-      setFreeShippingCities([...freeShippingCities, newCityInput.trim()]);
+  const shippingMethods = shippingResponse?.data || [];
+
+  const handleCreate = async () => {
+    if (!formData.name) {
+      toast.error("Shipping zone name is required");
+      return;
     }
-    setNewCityInput("");
-    setIsFreeCityModalOpen(false);
-  };
 
-  const handleRemoveFreeCity = (cityToRemove: string) => {
-    setFreeShippingCities(freeShippingCities.filter(city => city !== cityToRemove));
-  };
+    try {
+      await createShipping({
+        ...formData,
+        baseCost: Number(formData.baseCost) || 0,
+        perKmCost: Number(formData.perKmCost) || 0,
+        minOrderAmount: Number(formData.minOrderAmount) || 0,
+      }).unwrap();
 
-  const handleAddSameDayCity = () => {
-    if (newCityInput.trim() && !sameDayCities.includes(newCityInput.trim())) {
-      setSameDayCities([...sameDayCities, newCityInput.trim()]);
+      toast.success("Shipping zone created successfully");
+      setIsCreateModalOpen(false);
+      setFormData({
+        name: "",
+        description: "",
+        type: "paid",
+        baseCost: "",
+        perKmCost: "",
+        minOrderAmount: "",
+        isActive: true,
+      });
+    } catch (error: any) {
+      toast.error(error?.data?.message || "Failed to create shipping zone");
     }
-    setNewCityInput("");
-    setIsSameDayCityModalOpen(false);
   };
 
-  const handleRemoveSameDayCity = (cityToRemove: string) => {
-    setSameDayCities(sameDayCities.filter(city => city !== cityToRemove));
+  const handleDelete = async () => {
+    if (!selectedShippingId) return;
+
+    try {
+      await deleteShipping({ id: selectedShippingId }).unwrap();
+      toast.success("Shipping zone deleted successfully");
+      setIsDeleteModalOpen(false);
+      setSelectedShippingId(null);
+    } catch (error: any) {
+      toast.error(error?.data?.message || "Failed to delete shipping zone");
+    }
   };
 
-  const handleSavePrices = () => {
-    setPrices({ ...editPricesInput });
-    setIsPriceModalOpen(false);
-  };
+  const filteredMethods = shippingMethods.filter((method: any) =>
+    method.name.toLowerCase().includes(searchTerm.toLowerCase())
+  );
 
   return (
-    <div className="space-y-6 pb-10">
+    <div className="space-y-8 pb-10">
       {/* Header */}
-      <div className="flex flex-col gap-1 mb-2">
-        <h1 className="text-2xl font-medium text-gray-900">Shipping & Pickup Settings</h1>
-        <p className="text-gray-500 max-w-2xl text-[15px]">
-          Configure your logistics zones, standard fees, and regional delivery preferences for the telecom service areas.
-        </p>
-      </div>
-
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Free Shipping Cities Card */}
-        <div className="bg-white rounded-[24px] shadow-sm border border-gray-100 overflow-hidden flex flex-col">
-          <div className="bg-[#F8F9FC] px-6 py-5 flex items-center justify-between border-b border-gray-50">
-            <div className="flex items-center gap-3">
-              <Gift className="w-5 h-5 text-primary" strokeWidth={2} />
-              <h2 className="text-[17px] font-medium text-gray-900">Free Shipping Cities</h2>
-            </div>
-            <button
-              onClick={() => { setNewCityInput(""); setIsFreeCityModalOpen(true); }}
-              className="flex items-center gap-1.5 text-primary text-[14px] font-medium hover:underline cursor-pointer"
-            >
-              <Plus className="w-4 h-4" strokeWidth={2} />
-              Add City
-            </button>
-          </div>
-          <div className="p-6 flex-1 flex flex-col gap-5">
-            <p className="text-gray-600 leading-relaxed text-[15px]">
-              Customers in these specific locations will not be charged any shipping fees regardless of order size.
-            </p>
-            <div className="flex flex-wrap gap-2">
-              {freeShippingCities.map(city => (
-                <div key={city} className="bg-[#EBF3FF] text-[#4285F4] px-4 py-2 rounded-full text-[14px] font-semibold flex items-center gap-2">
-                  {city}
-                  <button onClick={() => handleRemoveFreeCity(city)} className="hover:text-blue-700 transition-colors cursor-pointer">
-                    <X className="w-4 h-4" strokeWidth={2.5} />
-                  </button>
-                </div>
-              ))}
-              {freeShippingCities.length === 0 && (
-                <p className="text-sm text-gray-400 italic">No cities added yet.</p>
-              )}
-            </div>
-          </div>
-          <div className="bg-[#F8F9FC] px-6 py-4 text-[14px] text-gray-600 font-medium">
-            Currently active for {freeShippingCities.length} {freeShippingCities.length === 1 ? 'city' : 'cities'}
-          </div>
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div>
+          <h1 className="text-2xl font-medium text-gray-900 flex items-center gap-2">
+            Shipping & Logistics <Truck className="w-6 h-6 text-primary" />
+          </h1>
+          <p className="text-gray-500 font-medium mt-1">Manage delivery zones, rates, and coverage area specifications.</p>
         </div>
 
-        {/* General Pricing Card */}
-        <div className="bg-white rounded-[24px] shadow-sm border border-gray-100 overflow-hidden flex flex-col">
-          <div className="bg-[#F8F9FC] px-6 py-5 flex items-center justify-between border-b border-gray-50">
-            <div className="flex items-center gap-3">
-              <Gift className="w-5 h-5 text-primary" strokeWidth={2} />
-              <h2 className="text-[17px] font-medium text-gray-900">General Pricing</h2>
-            </div>
-            <button
-              onClick={() => { setEditPricesInput({ ...prices }); setIsPriceModalOpen(true); }}
-              className="flex items-center gap-1.5 text-primary text-[14px] font-medium hover:underline cursor-pointer"
-            >
-              <PencilLine className="w-4 h-4" strokeWidth={2} />
-              Edit Price
-            </button>
-          </div>
-          <div className="p-6 flex-1 flex flex-col gap-4">
-            <div className="grid grid-cols-2 gap-4">
-              <div className="bg-[#F4F6F9] p-5 rounded-[16px]">
-                <p className="text-[14px] text-gray-600 font-medium mb-1">Standard Pickup</p>
-                <div className="flex items-baseline gap-1">
-                  <span className="text-[22px] font-medium text-gray-900">€{prices.standardPickup.toFixed(2)}</span>
-                  <span className="text-[13px] text-gray-500 font-medium">/Order</span>
+        <Dialog open={isCreateModalOpen} onOpenChange={setIsCreateModalOpen}>
+          <DialogTrigger asChild>
+            <Button className="bg-primary hover:bg-primary/95 text-white rounded-lg px-6 py-6 h-auto font-medium shadow-md transition-all active:scale-95 gap-2">
+              <Plus className="w-5 h-5" /> Define Shipping Zone
+            </Button>
+          </DialogTrigger>
+          <DialogContent className="sm:max-w-[550px] p-0 rounded-xl border-none shadow-2xl overflow-hidden">
+            <DialogHeader className="p-8 pb-4 bg-[#F8F9FC] border-b border-gray-100">
+              <DialogTitle className="text-2xl font-medium text-gray-900">New Shipping Configuration</DialogTitle>
+              <DialogDescription className="font-medium text-gray-500 pt-1">
+                Set up regional delivery costs and minimum order requirements.
+              </DialogDescription>
+            </DialogHeader>
+            <div className="p-8 space-y-6 max-h-[60vh] overflow-y-auto CustomScrollbar">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="space-y-3 md:col-span-2">
+                  <Label className="text-sm font-medium text-gray-700 uppercase tracking-wider">Zone Name <span className="text-red-500">*</span></Label>
+                  <Input
+                    placeholder="e.g., Inside Dhaka"
+                    className="bg-gray-50 border-none h-14 rounded-xl font-medium px-4 focus-visible:ring-1 focus-visible:ring-primary/20"
+                    value={formData.name}
+                    onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                  />
+                </div>
+
+                <div className="space-y-3 md:col-span-2">
+                  <Label className="text-sm font-medium text-gray-700 uppercase tracking-wider">Description</Label>
+                  <Input
+                    placeholder="Brief details about the zone..."
+                    className="bg-gray-50 border-none h-14 rounded-xl font-medium px-4 focus-visible:ring-1 focus-visible:ring-primary/20"
+                    value={formData.description}
+                    onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                  />
+                </div>
+
+                <div className="space-y-3">
+                  <Label className="text-sm font-medium text-gray-700 uppercase tracking-wider">Pricing Type</Label>
+                  <Select value={formData.type} onValueChange={(val) => setFormData({ ...formData, type: val })}>
+                    <SelectTrigger className="bg-gray-50 border-none h-14 rounded-xl font-medium px-4 focus:ring-1 focus:ring-primary/20">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent className="rounded-xl border-gray-100 font-medium">
+                      <SelectItem value="paid">Paid Delivery</SelectItem>
+                      <SelectItem value="free">Free Delivery</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div className="space-y-3">
+                  <Label className="text-sm font-medium text-gray-700 uppercase tracking-wider">Base Cost (€)</Label>
+                  <Input
+                    type="number"
+                    placeholder="0"
+                    className="bg-gray-50 border-none h-14 rounded-xl font-medium px-4 focus-visible:ring-1 focus-visible:ring-primary/20"
+                    value={formData.baseCost}
+                    onChange={(e) => setFormData({ ...formData, baseCost: e.target.value })}
+                  />
+                </div>
+
+                <div className="space-y-3">
+                  <Label className="text-sm font-medium text-gray-700 uppercase tracking-wider">Per KM Cost (€)</Label>
+                  <Input
+                    type="number"
+                    placeholder="0"
+                    className="bg-gray-50 border-none h-14 rounded-xl font-medium px-4 focus-visible:ring-1 focus-visible:ring-primary/20"
+                    value={formData.perKmCost}
+                    onChange={(e) => setFormData({ ...formData, perKmCost: e.target.value })}
+                  />
+                </div>
+
+                <div className="space-y-3">
+                  <Label className="text-sm font-medium text-gray-700 uppercase tracking-wider">Min. Order for Free (€)</Label>
+                  <Input
+                    type="number"
+                    placeholder="0"
+                    className="bg-gray-50 border-none h-14 rounded-xl font-medium px-4 focus-visible:ring-1 focus-visible:ring-primary/20"
+                    value={formData.minOrderAmount}
+                    onChange={(e) => setFormData({ ...formData, minOrderAmount: e.target.value })}
+                  />
                 </div>
               </div>
-              <div className="bg-[#F4F6F9] p-5 rounded-[16px]">
-                <p className="text-[14px] text-gray-600 font-medium mb-1">Standard Delivery</p>
-                <div className="flex items-baseline gap-1">
-                  <span className="text-[22px] font-medium text-gray-900">€{prices.standardDelivery.toFixed(2)}</span>
-                  <span className="text-[13px] text-gray-500 font-medium">/Order</span>
-                </div>
-              </div>
             </div>
-
-            <div className="bg-[#EEF6FF] p-4 rounded-[12px] flex gap-3 items-start mt-1">
-              <AlertTriangle className="w-5 h-5 text-gray-600 shrink-0 mt-0.5" strokeWidth={1.5} />
-              <p className="text-[14px] text-gray-800 leading-relaxed font-medium">
-                Standard pricing applies to all deliveries outside of the designated Free Shipping zones.
-              </p>
-            </div>
-          </div>
-        </div>
+            <DialogFooter className="p-8 pt-0 sm:justify-start gap-3">
+              <Button
+                onClick={handleCreate}
+                disabled={isCreating}
+                className="w-full sm:w-auto px-10 h-14 rounded-xl bg-primary hover:bg-primary/95 text-white font-medium shadow-lg transition-all active:scale-95"
+              >
+                {isCreating ? "Saving Zone..." : "Save Configuration"}
+              </Button>
+              <DialogClose asChild>
+                <Button variant="ghost" className="w-full sm:w-auto h-14 rounded-xl font-medium text-gray-400 hover:bg-gray-100">
+                  Cancel
+                </Button>
+              </DialogClose>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
       </div>
 
-      {/* Same-Day Delivery Card */}
-      <div className="bg-white rounded-[24px] shadow-sm border border-gray-100 overflow-hidden">
-        <div className="bg-[#F8F9FC] px-6 py-5 flex items-center justify-between border-b border-gray-50">
-          <div className="flex items-center gap-3">
-            <Gift className="w-5 h-5 text-primary" strokeWidth={2} />
-            <h2 className="text-[17px] font-medium text-gray-900">Same-Day Delivery</h2>
-          </div>
-          <button
-            onClick={() => { setEditPricesInput({ ...prices }); setIsPriceModalOpen(true); }}
-            className="flex items-center gap-1.5 text-primary text-[14px] font-medium hover:underline cursor-pointer"
-          >
-            <PencilLine className="w-4 h-4" strokeWidth={2} />
-            Manage Prices
-          </button>
-        </div>
-        <div className="p-6 md:p-8">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 md:gap-12">
-            <div className="space-y-3">
-              <label className="text-[15px] font-medium text-gray-800">Delivery Surcharge</label>
+      {/* Main Content Table */}
+      <Card className="border border-gray-100 shadow-sm rounded-xl overflow-hidden bg-white">
+        <CardHeader className="p-6 border-b border-gray-50 bg-[#F8F9FC]">
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+            <h2 className="text-lg font-medium text-gray-900">Configured Shipping Zones</h2>
+            <div className="relative w-full md:w-[320px]">
+              <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 w-5 h-5" />
               <Input
-                readOnly
-                value={`€${prices.deliverySurcharge.toFixed(2)}`}
-                className="w-full bg-[#F2F2F2] border-none rounded-[12px] h-[52px] text-gray-600 font-medium pointer-events-none px-4"
+                placeholder="Search shipping zones..."
+                className="pl-12 bg-white border-gray-200 h-12 rounded-xl text-gray-600 font-medium focus-visible:ring-1 focus-visible:ring-primary/20"
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
               />
             </div>
-            <div className="md:col-span-2 space-y-3">
-              <label className="text-[15px] font-medium text-gray-800">Enabled Cities</label>
-              <div className="flex flex-wrap gap-3">
-                {sameDayCities.map((city) => (
-                  <div key={city} className="bg-[#F4F6F9] group text-gray-700 px-5 py-[14px] rounded-[12px] text-[15px] font-medium flex items-center gap-2">
-                    {city}
-                    <button
-                      onClick={() => handleRemoveSameDayCity(city)}
-                      className="opacity-0 group-hover:opacity-100 transition-opacity ml-1 bg-gray-200 hover:bg-red-100 hover:text-red-500 rounded-full p-0.5 cursor-pointer"
+          </div>
+        </CardHeader>
+        <CardContent className="p-0">
+          <Table>
+            <TableHeader className="bg-gray-50/50">
+              <TableRow className="hover:bg-transparent border-gray-50">
+                <TableHead className="py-6 px-8 text-gray-900 font-medium text-[15px]">Zone Name</TableHead>
+                <TableHead className="py-6 text-gray-900 font-medium text-[15px]">Base Rates</TableHead>
+                <TableHead className="py-6 text-gray-900 font-medium text-[15px]">Variables</TableHead>
+                <TableHead className="py-6 text-gray-900 font-medium text-[15px]">Free Threshold</TableHead>
+                <TableHead className="py-6 text-gray-900 font-medium text-[15px]">Status</TableHead>
+                <TableHead className="py-6 px-8 text-right text-gray-900 font-medium text-[15px]">Actions</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {isLoading ? (
+                Array.from({ length: 3 }).map((_, i) => (
+                  <TableRow key={i} className="animate-pulse">
+                    <TableCell colSpan={6} className="h-20 bg-gray-50/50" />
+                  </TableRow>
+                ))
+              ) : filteredMethods.length === 0 ? (
+                <TableRow>
+                  <TableCell colSpan={6} className="h-64 text-center">
+                    <div className="flex flex-col items-center justify-center text-gray-400 font-medium">
+                      <Truck className="w-12 h-12 mb-4 opacity-20" />
+                      <p>No shipping zones found.</p>
+                      <Button variant="link" onClick={() => setSearchTerm("")} className="text-primary font-medium mt-2">Clear Search</Button>
+                    </div>
+                  </TableCell>
+                </TableRow>
+              ) : filteredMethods.map((method: any) => (
+                <TableRow key={method._id} className="hover:bg-gray-50/50 border-gray-50 group transition-colors">
+                  <TableCell className="py-6 px-8">
+                    <div className="flex flex-col">
+                      <span className="font-medium text-gray-900">{method.name}</span>
+                      <span className="text-[12px] text-gray-400 font-medium truncate max-w-[200px]">{method.description || "No description"}</span>
+                    </div>
+                  </TableCell>
+                  <TableCell className="py-6">
+                    <div className="flex flex-col">
+                      <span className="font-medium text-gray-900 text-lg">€{method.baseCost}</span>
+                      <span className="text-[11px] text-primary font-medium uppercase tracking-wider">{method.type}</span>
+                    </div>
+                  </TableCell>
+                  <TableCell className="py-6">
+                    <span className="font-medium text-gray-700 truncate min-w-[80px] inline-block mt-3">€{method.perKmCost}<span className="text-[11px] text-gray-400 ml-1">/KM</span></span>
+                  </TableCell>
+                  <TableCell className="py-6">
+                    <span className="font-medium text-gray-700 inline-block mt-3">Over €{method.minOrderAmount}</span>
+                  </TableCell>
+                  <TableCell className="py-6">
+                    <Badge className={cn(
+                      "rounded-full px-4 py-1.5 font-medium border-none shadow-none text-[12px]",
+                      method.isActive ? "bg-[#E6F9F0] text-[#2DC766]" : "bg-gray-100 text-gray-400"
+                    )}>
+                      {method.isActive ? "Active Zone" : "Disabled"}
+                    </Badge>
+                  </TableCell>
+                  <TableCell className="py-6 px-8 text-right">
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => {
+                        setSelectedShippingId(method._id);
+                        setIsDeleteModalOpen(true);
+                      }}
+                      className="text-gray-400 hover:text-rose-500 hover:bg-rose-50 rounded-xl transition-all"
                     >
-                      <X className="w-3.5 h-3.5" strokeWidth={2.5} />
-                    </button>
-                  </div>
-                ))}
-                <button
-                  onClick={() => { setNewCityInput(""); setIsSameDayCityModalOpen(true); }}
-                  className="border-2 border-dashed border-gray-200 text-gray-700 hover:bg-gray-50 px-5 py-[14px] rounded-[12px] text-[15px] font-medium flex items-center gap-2 transition-colors cursor-pointer"
-                >
-                  <Plus className="w-4 h-4 text-gray-500" strokeWidth={2} />
-                  Add City
-                </button>
-              </div>
-            </div>
-          </div>
+                      <Trash2 className="w-5 h-5" />
+                    </Button>
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </CardContent>
+      </Card>
+
+      {/* Footer Info */}
+      <div className="bg-blue-50/50 p-6 rounded-xl border border-blue-100 flex items-start gap-4">
+        <Info className="w-6 h-6 text-primary shrink-0 mt-0.5" />
+        <div className="space-y-1">
+          <h4 className="text-sm font-medium text-gray-900">Logistics Policy Tip</h4>
+          <p className="text-sm text-gray-600 font-medium">Zones are processed in order of creation. For free shipping within specific areas, ensure the "Free Threshold" amount is set correctly to encourage larger customer orders.</p>
         </div>
       </div>
 
-      {/* MODALS */}
-
-      {/* Free Shipping City Modal */}
-      <Dialog open={isFreeCityModalOpen} onOpenChange={setIsFreeCityModalOpen}>
-        <DialogContent className="sm:max-w-[425px]">
-          <DialogHeader>
-            <DialogTitle>Add Free Shipping City</DialogTitle>
-          </DialogHeader>
-          <div className="grid gap-4 py-4">
-            <div className="space-y-2">
-              <Label htmlFor="city" className="text-right">
-                City Name
-              </Label>
-              <Input
-                id="city"
-                value={newCityInput}
-                onChange={(e) => setNewCityInput(e.target.value)}
-                placeholder="e.g. Amsterdam"
-                className="col-span-3"
-                onKeyDown={(e) => {
-                  if (e.key === "Enter") handleAddFreeCity();
-                }}
-              />
+      {/* Delete Confirmation Modal */}
+      <Dialog open={isDeleteModalOpen} onOpenChange={setIsDeleteModalOpen}>
+        <DialogContent className="sm:max-w-[400px] p-0 rounded-xl border-none shadow-2xl overflow-hidden">
+          <div className="p-8 text-center bg-white">
+            <div className="w-20 h-20 bg-rose-50 rounded-full flex items-center justify-center mx-auto mb-6">
+              <AlertCircle className="w-10 h-10 text-rose-500" />
             </div>
+            <h3 className="text-2xl font-medium text-gray-900 mb-2">Remove Shipping Zone?</h3>
+            <p className="text-gray-500 font-medium">This will permanently delete the zone and its associated cost logic from the checkout process.</p>
           </div>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setIsFreeCityModalOpen(false)} className="cursor-pointer">Cancel</Button>
-            <Button onClick={handleAddFreeCity} className="bg-primary cursor-pointer">Add City</Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-
-      {/* Same-Day City Modal */}
-      <Dialog open={isSameDayCityModalOpen} onOpenChange={setIsSameDayCityModalOpen}>
-        <DialogContent className="sm:max-w-[425px]">
-          <DialogHeader>
-            <DialogTitle>Add Same-Day Delivery City</DialogTitle>
-          </DialogHeader>
-          <div className="grid gap-4 py-4">
-            <div className="space-y-2">
-              <Label htmlFor="sameday-city" className="text-right">
-                City Name
-              </Label>
-              <Input
-                id="sameday-city"
-                value={newCityInput}
-                onChange={(e) => setNewCityInput(e.target.value)}
-                placeholder="e.g. Rotterdam"
-                className="col-span-3"
-                onKeyDown={(e) => {
-                  if (e.key === "Enter") handleAddSameDayCity();
-                }}
-              />
-            </div>
+          <div className="flex border-t border-gray-100">
+            <Button
+              variant="ghost"
+              onClick={() => setIsDeleteModalOpen(false)}
+              className="flex-1 h-16 rounded-none font-medium text-gray-500 hover:bg-gray-50 border-r border-gray-100"
+            >
+              Cancel
+            </Button>
+            <Button
+              onClick={handleDelete}
+              disabled={isDeleting}
+              className="flex-1 h-16 rounded-none font-medium text-rose-500 hover:text-rose-600 hover:bg-rose-50 transition-colors"
+            >
+              {isDeleting ? "Deleting..." : "Confirm Delete"}
+            </Button>
           </div>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setIsSameDayCityModalOpen(false)} className="cursor-pointer">Cancel</Button>
-            <Button onClick={handleAddSameDayCity} className="bg-primary cursor-pointer">Add City</Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-
-      {/* Edit Prices Modal */}
-      <Dialog open={isPriceModalOpen} onOpenChange={setIsPriceModalOpen}>
-        <DialogContent className="sm:max-w-[425px]">
-          <DialogHeader>
-            <DialogTitle>Edit Prices</DialogTitle>
-          </DialogHeader>
-          <div className="grid gap-4 py-4">
-            <div className="space-y-2">
-              <Label htmlFor="standard-pickup">Standard Pickup (€)</Label>
-              <Input
-                id="standard-pickup"
-                type="number"
-                step="0.01"
-                min="0"
-                value={editPricesInput.standardPickup}
-                onChange={(e) => setEditPricesInput({ ...editPricesInput, standardPickup: parseFloat(e.target.value) || 0 })}
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="standard-delivery">Standard Delivery (€)</Label>
-              <Input
-                id="standard-delivery"
-                type="number"
-                step="0.01"
-                min="0"
-                value={editPricesInput.standardDelivery}
-                onChange={(e) => setEditPricesInput({ ...editPricesInput, standardDelivery: parseFloat(e.target.value) || 0 })}
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="surcharge">Delivery Surcharge (€)</Label>
-              <Input
-                id="surcharge"
-                type="number"
-                step="0.01"
-                min="0"
-                value={editPricesInput.deliverySurcharge}
-                onChange={(e) => setEditPricesInput({ ...editPricesInput, deliverySurcharge: parseFloat(e.target.value) || 0 })}
-              />
-            </div>
-          </div>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setIsPriceModalOpen(false)} className="cursor-pointer">Cancel</Button>
-            <Button onClick={handleSavePrices} className="bg-primary cursor-pointer">Save Changes</Button>
-          </DialogFooter>
         </DialogContent>
       </Dialog>
     </div>

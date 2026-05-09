@@ -42,7 +42,7 @@ export default function Wallet() {
     <div className="space-y-8">
       {/* Header */}
       <div className="flex flex-col gap-1">
-        <h1 className="text-2xl font-bold text-gray-900">Pending Top-ups</h1>
+        <h1 className="text-2xl font-medium text-gray-900">Pending Top-ups</h1>
         <p className="text-gray-500">Current requests requiring administrative approval.</p>
       </div>
 
@@ -64,7 +64,7 @@ export default function Wallet() {
             </div>
             <div>
               <p className={cn("text-[15px] font-semibold transition-colors duration-300", stat.isPrimary ? "text-gray-300" : "text-gray-500 group-hover:text-gray-300")}>{stat.label}</p>
-              <h3 className="text-[26px] font-bold mt-1 transition-colors duration-300">{stat.value}</h3>
+              <h3 className="text-[26px] font-medium mt-1 transition-colors duration-300">{stat.value}</h3>
             </div>
           </div>
         ))}
@@ -95,7 +95,7 @@ export default function Wallet() {
                 </TableCell>
                 <TableCell className="py-5 font-semibold text-gray-700 text-[15px]">{topup.walletBalance}</TableCell>
                 <TableCell className="py-5">
-                  <Badge className="bg-[#E6F9F0] text-[#2DC766] hover:bg-[#E6F9F0] px-4 py-1.5 rounded-full font-bold border-none shadow-none text-[14px]">
+                  <Badge className="bg-[#E6F9F0] text-[#2DC766] hover:bg-[#E6F9F0] px-4 py-1.5 rounded-full font-medium border-none shadow-none text-[14px]">
                     {topup.status}
                   </Badge>
                 </TableCell>
@@ -111,15 +111,15 @@ export default function Wallet() {
         <div className="p-8 border-t border-gray-50 flex flex-col md:flex-row items-center justify-between gap-4 bg-white">
           <p className="text-gray-500 font-medium">Showing 4 of 248 Orders</p>
           <div className="flex items-center gap-2">
-            <Button variant="ghost" className="text-gray-400 font-bold hover:bg-transparent text-[15px]">Prev</Button>
+            <Button variant="ghost" className="text-gray-400 font-medium hover:bg-transparent text-[15px]">Prev</Button>
             <div className="flex items-center gap-2 px-2">
-              <Button className="w-10 h-10 p-0 rounded-lg bg-primary text-white font-bold hover:bg-primary/90 shadow-md">1</Button>
-              <Button variant="outline" className="w-10 h-10 p-0 rounded-lg border-gray-100 text-gray-600 font-bold hover:bg-gray-50">2</Button>
-              <Button variant="outline" className="w-10 h-10 p-0 rounded-lg border-gray-100 text-gray-600 font-bold hover:bg-gray-50">3</Button>
-              <span className="text-gray-400 px-1 font-bold">...</span>
-              <Button variant="outline" className="w-10 h-10 p-0 rounded-lg border-gray-100 text-gray-600 font-bold hover:bg-gray-50">10</Button>
+              <Button className="w-10 h-10 p-0 rounded-lg bg-primary text-white font-medium hover:bg-primary/90 shadow-md">1</Button>
+              <Button variant="outline" className="w-10 h-10 p-0 rounded-lg border-gray-100 text-gray-600 font-medium hover:bg-gray-50">2</Button>
+              <Button variant="outline" className="w-10 h-10 p-0 rounded-lg border-gray-100 text-gray-600 font-medium hover:bg-gray-50">3</Button>
+              <span className="text-gray-400 px-1 font-medium">...</span>
+              <Button variant="outline" className="w-10 h-10 p-0 rounded-lg border-gray-100 text-gray-600 font-medium hover:bg-gray-50">10</Button>
             </div>
-            <Button variant="ghost" className="text-gray-400 font-bold hover:bg-transparent text-[15px]">Next</Button>
+            <Button variant="ghost" className="text-gray-400 font-medium hover:bg-transparent text-[15px]">Next</Button>
           </div>
         </div>
       </div>

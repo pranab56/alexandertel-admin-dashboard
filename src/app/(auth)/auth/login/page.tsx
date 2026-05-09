@@ -3,7 +3,9 @@
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { useLoginMutation } from '@/features/auth/authApi';
 import { cn } from '@/lib/utils';
+import { setAuthCookie } from '@/app/actions/auth';
 import { ArrowRight, Eye, EyeOff } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
@@ -14,10 +16,10 @@ export default function LoginPage() {
   const [email, setEmail] = useState<string>('');
   const [password, setPassword] = useState<string>('');
   const [showPassword, setShowPassword] = useState<boolean>(false);
-  const [isLoading, setIsLoading] = useState(false);
   const [errors, setErrors] = useState<{ email?: string; password?: string }>({});
-
+  const [login, { isLoading }] = useLoginMutation();
   const router = useRouter();
+
 
   const validate = () => {
     const newErrors: { email?: string; password?: string } = {};
@@ -40,31 +42,22 @@ export default function LoginPage() {
 
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-
     if (!validate()) {
       return;
     }
-
-    setIsLoading(true);
-
-    // Simulate login delay
-    setTimeout(() => {
-      setIsLoading(false);
-      if (email === 'my@gmail.com' && password === 'hello123') {
-        toast.success('Login successful!');
-        router.push('/my-dashboard');
-      } else if (email === 'provider@gmail.com' && password === 'hello123') {
-        toast.success('Login successful!');
-        router.push('/provider');
-      }
-      else {
-        toast.error('Invalid email or password!');
-      }
-    }, 1500);
+    try {
+      const res = await login({ email, password }).unwrap();
+      toast.success(res.message);
+      await setAuthCookie(res.data.accessToken);
+      router.push('/');
+    } catch (error: any) {
+      toast.error(error.data.message);
+    }
   };
+  
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-[#EEF2F9] p-4 font-sans">
+    <div className="flex min-h-screen items-center justify-center bg-[#EEF2F9] p-4">
       <div className="w-full max-w-xl">
         <div className="bg-white rounded-[2.5rem] shadow-[0_10px_40px_rgba(0,0,0,0.04)] p-8 md:p-12">
           {/* Header */}

@@ -10,12 +10,17 @@ const nextConfig: NextConfig = {
       },
       {
         protocol: "https",
-        hostname: "gratisography.com",
+        hostname: "res.cloudinary.com",
+        pathname: "/**",
+      },
+      {
+        protocol: "http",
+        hostname: "humayon5002.binarybards.online",
         pathname: "/**",
       },
       {
         protocol: "https",
-        hostname: "img.freepik.com",
+        hostname: "gratisography.com",
         pathname: "/**",
       },
       {
@@ -25,8 +30,8 @@ const nextConfig: NextConfig = {
       },
       {
         protocol: "http",
-        hostname: "localhost",
-        port: "5010",
+        hostname: "10.10.7.55",
+        port: "5006",
         pathname: "/**",
       },
       // Add your specific uploads pattern

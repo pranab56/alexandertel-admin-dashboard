@@ -153,7 +153,7 @@ export default function ResetPasswordPage() {
                 className="w-52 h-auto py-2"
               />
               <div>
-                <h2 className="text-2xl font-bold text-gray-800 mb-3">Create New Password</h2>
+                <h2 className="text-2xl font-medium text-gray-800 mb-3">Create New Password</h2>
                 <p className="text-gray-600 text-sm">
                   To help keep your account safe, House Finder wants to make sure it&apos;s really you trying to sign in.
                 </p>

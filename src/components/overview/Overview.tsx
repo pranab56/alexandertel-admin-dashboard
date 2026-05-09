@@ -13,7 +13,9 @@ import {
   ClipboardList,
   Package,
   ShoppingBag,
-  Wallet
+  Wallet,
+  TrendingUp,
+  Loader2
 } from "lucide-react";
 import { useState } from "react";
 import {
@@ -22,213 +24,157 @@ import {
   ResponsiveContainer,
   Tooltip,
   XAxis,
-  YAxis
+  YAxis,
+  CartesianGrid
 } from "recharts";
-
-const statsData = [
-  { label: "Today's Sales", value: "€4,250.00", icon: Wallet, color: "bg-blue-50 text-blue-500" },
-  { label: "Total Orders", value: "48", icon: ShoppingBag, color: "bg-blue-50 text-blue-500" },
-  { label: "Active Repairs", value: "12", icon: ClipboardList, color: "bg-blue-50 text-blue-500" },
-  { label: "Wallet Top-ups", value: "8 Pending", icon: Wallet, color: "bg-blue-50 text-blue-500" },
-];
-
-const revenueData = [
-  { name: "Mon", value: 3000 },
-  { name: "Tue", value: 2500 },
-  { name: "Wed", value: 2000 },
-  { name: "Thu", value: 4500 },
-  { name: "Fri", value: 4800 },
-  { name: "Sat", value: 2000 },
-  { name: "Sun", value: 3800 },
-];
-
-const repairCategories = [
-  { name: "Screen Replacement", percentage: 65, color: "bg-secondary" },
-  { name: "Battery Service", percentage: 25, color: "bg-primary" },
-  { name: "Water Damage", percentage: 10, color: "bg-red-500" },
-];
+import { useOverviewAnalyticsQuery, useOverviewSalesQuery } from "@/features/overview/overviewApi";
 
 export default function Overview() {
-  const [date, setDate] = useState<Date | undefined>(new Date("2025-10-24"));
+  const [viewType, setViewType] = useState<"weekly" | "yearly">("weekly");
+
+  const { data: analyticsResponse, isLoading: isAnalyticsLoading } = useOverviewAnalyticsQuery({});
+  const { data: salesResponse, isLoading: isSalesLoading } = useOverviewSalesQuery({ type: viewType });
+
+  const stats = analyticsResponse?.data || { totalOrders: 0, totalSales: 0, totalActiveRepair: 0 };
+  const chartData = (salesResponse?.data || []).map((item: any) => ({
+    name: item.label,
+    value: item.totalSales,
+    orders: item.totalOrders
+  }));
+
+  const statsData = [
+    { label: "Total Sales", value: `€${stats.totalSales.toLocaleString()}`, icon: Wallet, color: "bg-blue-50 text-blue-500" },
+    { label: "Total Orders", value: stats.totalOrders.toString(), icon: ShoppingBag, color: "bg-emerald-50 text-emerald-500" },
+    { label: "Active Repairs", value: stats.totalActiveRepair.toString(), icon: ClipboardList, color: "bg-amber-50 text-amber-500" },
+  ];
+
+  const CustomTooltip = ({ active, payload, label }: any) => {
+    if (active && payload && payload.length) {
+      return (
+        <div className="bg-white p-4 rounded-xl shadow-xl border border-gray-100">
+          <p className="text-sm font-medium text-gray-900 mb-1">{label}</p>
+          <div className="space-y-1">
+            <p className="text-xs font-medium text-primary flex items-center gap-2">
+              Sales: <span className="text-gray-700">€{payload[0].value.toLocaleString()}</span>
+            </p>
+            <p className="text-xs font-medium text-emerald-500 flex items-center gap-2">
+              Orders: <span className="text-gray-700">{payload[0].payload.orders}</span>
+            </p>
+          </div>
+        </div>
+      );
+    }
+    return null;
+  };
 
   return (
     <div className="space-y-8 pb-10">
       {/* Header */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Dashboard Overview</h1>
-          <p className="text-gray-500 mt-1">Monitoring real-time performance and operations.</p>
+          <h1 className="text-2xl font-medium text-gray-900 tracking-tight flex items-center gap-2">
+            Dashboard Overview <TrendingUp className="w-6 h-6 text-emerald-500" />
+          </h1>
+          <p className="text-gray-500 font-medium mt-1">Monitoring real-time performance and operations.</p>
         </div>
-        <Popover>
-          <PopoverTrigger asChild>
-            <div className="flex items-center gap-2 bg-white px-4 py-2 rounded-xl border border-gray-100 cursor-pointer hover:bg-gray-50 transition-colors">
-              <CalendarIcon className="w-5 h-5 text-gray-400" />
-              <span className="text-gray-600 font-medium">{date ? format(date, "MMMM d, yyyy") : "Pick a date"}</span>
-            </div>
-          </PopoverTrigger>
-          <PopoverContent className="w-auto p-0 rounded-2xl border-gray-100 shadow-lg" align="end">
-            <Calendar
-              mode="single"
-              selected={date}
-              onSelect={setDate}
-              initialFocus
-            />
-          </PopoverContent>
-        </Popover>
       </div>
 
       {/* Top Stats Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
         {statsData.map((stat, idx) => (
-          <div key={idx} className="bg-white p-6 rounded-xl border border-gray-100 flex items-center gap-4 transition-transform hover:scale-[1.02]">
-            <div className={cn("w-12 h-12 rounded-xl flex items-center justify-center", stat.color)}>
-              <stat.icon className="w-6 h-6" />
+          <div key={idx} className="bg-white p-8 rounded-xl border border-gray-100 flex items-center gap-6 transition-all hover:shadow-md hover:-translate-y-1">
+            <div className={cn("w-16 h-16 rounded-2xl flex items-center justify-center shrink-0", stat.color)}>
+              <stat.icon className="w-8 h-8" />
             </div>
             <div>
-              <p className="text-sm text-gray-500 font-medium">{stat.label}</p>
-              <h3 className="text-xl font-bold text-gray-900 mt-0.5">{stat.value}</h3>
+              <p className="text-sm text-gray-400 font-medium uppercase tracking-wider">{stat.label}</p>
+              {isAnalyticsLoading ? (
+                <div className="h-8 w-24 bg-gray-100 animate-pulse rounded-md mt-1" />
+              ) : (
+                <h3 className="text-2xl font-medium text-gray-900 mt-0.5">{stat.value}</h3>
+              )}
             </div>
           </div>
         ))}
       </div>
 
       {/* Main Grid Content */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-
-        {/* Left/Middle: Revenue & Schedule */}
-        <div className="lg:col-span-2 space-y-8">
-
-          {/* Weekly Revenue Chart */}
-          <div className="bg-white p-8 rounded-xl">
-            <div className="mb-6">
-              <h2 className="text-xl font-bold text-gray-900">Weekly Revenue</h2>
-              <p className="text-sm text-gray-500 mt-1">Historical performance for current year</p>
-            </div>
-            <div className="h-[300px] w-full">
-              <ResponsiveContainer width="100%" height="100%">
-                <AreaChart data={revenueData} margin={{ top: 10, right: 20, left: 20, bottom: 10 }}>
-                  <defs>
-                    <linearGradient id="colorValue" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor="#6C63FF" stopOpacity={0.1} />
-                      <stop offset="95%" stopColor="#6C63FF" stopOpacity={0} />
-                    </linearGradient>
-                  </defs>
-                  <XAxis
-                    dataKey="name"
-                    axisLine={false}
-                    tickLine={false}
-                    tick={{ fill: '#9CA3AF', fontSize: 13 }}
-                    dy={10}
-                    interval={0}
-                  />
-                  <YAxis hide />
-                  <Tooltip
-                    contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 4px 12px rgba(0,0,0,0.1)' }}
-                  />
-                  <Area
-                    type="monotone"
-                    dataKey="value"
-                    stroke="#6C63FF"
-                    strokeWidth={3}
-                    fillOpacity={1}
-                    fill="url(#colorValue)"
-                  />
-                </AreaChart>
-              </ResponsiveContainer>
-            </div>
-          </div>
-
-          {/* Pickup & Delivery Schedule */}
-          <div className="space-y-6">
-            <h2 className="text-xl font-medium text-gray-900">Pickup & Delivery Schedule (Today)</h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div className="bg-[#70C8FF] p-6 rounded-xl flex items-center gap-6 text-white overflow-hidden relative group cursor-pointer transition-all hover:brightness-105">
-                <div className="w-14 h-14 bg-secondary rounded-full flex items-center justify-center shrink-0 shadow-lg">
-                  <span className="text-2xl font-bold">3</span>
-                </div>
-                <div>
-                  <h4 className="text-lg font-medium">Pickups Pending</h4>
-                  <p className="text-white/80 text-sm">Scheduled for store walk- in</p>
-                </div>
-              </div>
-
-              <div className="bg-white p-6 rounded-xl border border-gray-100 flex items-center gap-6 overflow-hidden relative group cursor-pointer transition-all hover:bg-gray-50">
-                <div className="w-14 h-14 bg-secondary rounded-full flex items-center justify-center shrink-0 shadow-lg">
-                  <span className="text-2xl font-bold text-white">2</span>
-                </div>
-                <div>
-                  <h4 className="text-lg font-medium text-gray-900">Deliveries Out</h4>
-                  <p className="text-gray-500 text-sm">Currently in courier transit</p>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* Right: Alerts & Categories */}
-        <div className="space-y-8">
-
-          {/* Priority Alerts */}
-          <div className="space-y-4">
-            <div className="flex items-center justify-between">
-              <h2 className="text-xl font-medium text-gray-900">Priority Alerts</h2>
-              <span className="bg-red-50 text-red-500 text-[10px] font-bold px-2 py-1 rounded-md tracking-wider uppercase">2 CRITICAL</span>
+      <div className="space-y-8">
+        {/* Sales Analytic Chart */}
+        <div className="bg-white p-8 rounded-xl border border-gray-100 shadow-sm">
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-10">
+            <div>
+              <h2 className="text-xl font-medium text-gray-900">{viewType === "weekly" ? "Weekly" : "Yearly"} Revenue</h2>
+              <p className="text-sm text-gray-400 font-medium mt-1">Business performance analytics for the selected period</p>
             </div>
 
-            <div className="bg-white p-6 rounded-xl border border-gray-100 space-y-4 transition-all hover:shadow-md">
-              <div className="flex gap-4">
-                <div className="w-12 h-12 bg-red-50 rounded-xl flex items-center justify-center shrink-0">
-                  <Package className="w-6 h-6 text-red-400" />
-                </div>
-                <div>
-                  <h4 className="font-medium text-gray-900">Low stock: iPhone 14</h4>
-                  <p className="text-sm text-gray-500 mt-1 leading-relaxed">Only 2 units remaining in Main Hub.</p>
-                </div>
-              </div>
-              <button className="w-full bg-secondary cursor-pointer text-white py-3 rounded-xl font-bold text-sm transition-all active:scale-[0.98] hover:bg-secondary/90">
-                Restock Now
+            <div className="flex items-center bg-gray-50 p-1.5 rounded-xl border border-gray-100">
+              <button
+                onClick={() => setViewType("weekly")}
+                className={cn(
+                  "px-6 py-2.5 rounded-lg text-sm cursor-pointer font-medium transition-all",
+                  viewType === "weekly"
+                    ? "bg-white text-primary shadow-md"
+                    : "text-gray-400 hover:text-gray-600"
+                )}
+              >
+                Weekly
               </button>
-            </div>
-
-            <div className="bg-white p-6 rounded-xl border border-gray-100 space-y-4 transition-all hover:shadow-md">
-              <div className="flex gap-4">
-                <div className="w-12 h-12 bg-blue-50 rounded-xl flex items-center justify-center shrink-0">
-                  <Wallet className="w-6 h-6 text-blue-400" />
-                </div>
-                <div>
-                  <h4 className="font-medium text-gray-900">Pending bank transfer top-ups:4</h4>
-                  <p className="text-sm text-gray-500 mt-1 leading-relaxed">Verification required for $1,240.00 total.</p>
-                </div>
-              </div>
-              <button className="w-full bg-primary cursor-pointer text-white py-3 rounded-xl font-bold text-sm transition-all active:scale-[0.98] hover:bg-primary/90">
-                Verify Transfers
+              <button
+                onClick={() => setViewType("yearly")}
+                className={cn(
+                  "px-6 py-2.5 rounded-lg text-sm cursor-pointer font-medium transition-all",
+                  viewType === "yearly"
+                    ? "bg-white text-primary shadow-md"
+                    : "text-gray-400 hover:text-gray-600"
+                )}
+              >
+                Yearly
               </button>
             </div>
           </div>
 
-          {/* Top Repair Categories */}
-          <div className="bg-white p-8 rounded-xl border border-gray-100">
-            <h2 className="text-xl font-medium text-gray-900 mb-6">Top Repair Categories</h2>
-            <div className="space-y-8">
-              {repairCategories.map((item, idx) => (
-                <div key={idx} className="space-y-3">
-                  <div className="flex justify-between items-center text-sm font-medium text-gray-900">
-                    <span>{item.name}</span>
-                    <span>{item.percentage}%</span>
-                  </div>
-                  <div className="h-2 w-full bg-gray-100 rounded-full overflow-hidden">
-                    <div
-                      className={cn("h-full rounded-full transition-all duration-1000", item.color)}
-                      style={{ width: `${item.percentage}%` }}
-                    />
-                  </div>
-                </div>
-              ))}
-            </div>
+          <div className="h-[360px] w-full relative">
+            {isSalesLoading && (
+              <div className="absolute inset-0 z-10 bg-white/50 backdrop-blur-sm flex items-center justify-center">
+                <Loader2 className="w-10 h-10 text-primary animate-spin" />
+              </div>
+            )}
+            <ResponsiveContainer width="100%" height="100%">
+              <AreaChart data={chartData} margin={{ top: 10, right: 10, left: 0, bottom: 20 }}>
+                <defs>
+                  <linearGradient id="colorSales" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="5%" stopColor="#6C63FF" stopOpacity={0.15} />
+                    <stop offset="95%" stopColor="#6C63FF" stopOpacity={0.01} />
+                  </linearGradient>
+                </defs>
+                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#F3F4F6" />
+                <XAxis
+                  dataKey="name"
+                  axisLine={false}
+                  tickLine={false}
+                  tick={{ fill: '#9CA3AF', fontSize: 13, fontWeight: 600 }}
+                  dy={15}
+                />
+                <YAxis
+                  axisLine={false}
+                  tickLine={false}
+                  tick={{ fill: '#9CA3AF', fontSize: 13, fontWeight: 600 }}
+                />
+                <Tooltip content={<CustomTooltip />} cursor={{ stroke: '#6C63FF', strokeWidth: 1 }} />
+                <Area
+                  type="monotone"
+                  dataKey="value"
+                  stroke="#6C63FF"
+                  strokeWidth={4}
+                  fillOpacity={1}
+                  fill="url(#colorSales)"
+                  animationDuration={1500}
+                />
+              </AreaChart>
+            </ResponsiveContainer>
           </div>
-
         </div>
-
       </div>
     </div>
   );

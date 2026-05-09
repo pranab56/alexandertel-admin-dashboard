@@ -63,7 +63,7 @@ export default function UserManagement() {
       <Card className="border-none shadow-[0_2px_15px_-3px_rgba(0,0,0,0.07),0_10px_20px_-2px_rgba(0,0,0,0.04)] bg-white rounded-2xl overflow-hidden">
         <CardContent className="p-0">
           <div className="p-6 sm:p-8 space-y-1">
-            <h1 className="text-xl sm:text-2xl font-bold text-[#213F7D]">Users List</h1>
+            <h1 className="text-xl sm:text-2xl font-medium text-[#213F7D]">Users List</h1>
             <p className="text-xs sm:text-sm text-gray-500">Manage access control and user permissions for the platform.</p>
           </div>
 
@@ -114,7 +114,7 @@ export default function UserManagement() {
               <button className="p-2 rounded-lg border border-gray-200 text-[#718096] hover:bg-gray-50 transition-all">
                 <ChevronLeft className="w-4 h-4 sm:w-5 sm:h-5" />
               </button>
-              <button className="w-8 h-8 sm:w-10 sm:h-10 rounded-lg bg-[#1E61D5] text-white font-bold shadow-md shadow-blue-200 text-sm sm:text-base">1</button>
+              <button className="w-8 h-8 sm:w-10 sm:h-10 rounded-lg bg-[#1E61D5] text-white font-medium shadow-md shadow-blue-200 text-sm sm:text-base">1</button>
               <button className="w-8 h-8 sm:w-10 sm:h-10 rounded-lg text-[#718096] hover:bg-gray-50 transition-all font-medium text-sm sm:text-base">2</button>
               <button className="w-8 h-8 sm:w-10 sm:h-10 rounded-lg text-[#718096] hover:bg-gray-50 transition-all font-medium text-sm sm:text-base">3</button>
               <span className="px-1 sm:px-2 text-[#718096]">...</span>

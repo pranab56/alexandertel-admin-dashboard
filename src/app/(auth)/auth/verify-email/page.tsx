@@ -1,18 +1,24 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
+import { useResendOTPMutation, useVerifyEmailMutation } from "@/features/auth/authApi";
 import { cn } from "@/lib/utils";
 import { ArrowLeft, ArrowRight } from "lucide-react";
 import Link from "next/link";
+import { useRouter, useSearchParams } from "next/navigation";
 import { FormEvent, useEffect, useRef, useState } from "react";
 import toast from "react-hot-toast";
 
 export default function VerifyEmail() {
   const [otp, setOtp] = useState<string[]>(new Array(6).fill(""));
   const [activeInput, setActiveInput] = useState(0);
-  const [isLoading, setIsLoading] = useState(false);
   const [timer, setTimer] = useState(59);
   const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
+  const [verifyEmail, { isLoading }] = useVerifyEmailMutation();
+  const [reSendOTP, { isLoading: isResendLoading }] = useResendOTPMutation();
+  const searchParams = useSearchParams();
+  const email = searchParams.get("email");
+  const router = useRouter();
 
   useEffect(() => {
     if (timer > 0) {
@@ -48,25 +54,26 @@ export default function VerifyEmail() {
     const code = otp.join("");
     if (code.length < 6) return;
 
-    setIsLoading(true);
     try {
       // Simulate API call
-      await new Promise((resolve) => setTimeout(resolve, 1500));
-      console.log("Verifying OTP:", code);
-      toast.success("Email verified successfully!");
-    } catch (error) {
-      console.error("Verification error:", error);
-      toast.error("Invalid verification code.");
-    } finally {
-      setIsLoading(false);
+      const res = await verifyEmail({ email: email, oneTimeCode: code }).unwrap();
+      if (res.success) {
+        toast.success(res.message);
+        router.push(`/auth/reset-password?token=${res.data}`)
+      }
+    } catch (error: any) {
+      console.error("Verification error:", error?.message);
+      toast.error(error?.message);
     }
   };
 
-  const handleResend = () => {
+  const handleResend = async () => {
     if (timer === 0) {
-      setTimer(59);
-      console.log("Resending OTP...");
-      toast.success("New code sent to your email!");
+      const res = await reSendOTP({ email }).unwrap();
+      if (res.success) {
+        setTimer(59);
+        toast.success(res.message);
+      }
     }
   };
 
@@ -125,7 +132,7 @@ export default function VerifyEmail() {
               disabled={timer > 0}
               className={cn(
                 "text-lg font-medium transition-colors text-base",
-                timer > 0 ? "text-[#94A3B8] cursor-not-allowed" : "text-[#1D68D5] hover:underline"
+                timer > 0 ? "text-[#94A3B8] cursor-not-allowed" : "text-[#1D68D5] hover:underline cursor-pointer"
               )}
             >
               {timer > 0 ? `Resend code in ${timer}s` : "Resend code"}

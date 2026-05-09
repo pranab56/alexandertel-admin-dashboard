@@ -1,171 +1,192 @@
 "use client";
 
+import { useSingleOrdersQuery } from "@/features/orders/ordersApi";
+import { useParams, useRouter } from "next/navigation";
+import {
+  ChevronLeft,
+  User,
+  MapPin,
+  CreditCard,
+  Truck,
+  Calendar,
+  Hash,
+  Mail,
+  ShieldCheck,
+  Package,
+  Clock,
+  Printer
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
-import { ChevronRight, CreditCard, Download } from "lucide-react";
-import Link from "next/link";
-import { useParams } from "next/navigation";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { cn } from "@/lib/utils";
 
-export default function OrderDetails() {
-  const params = useParams();
-  const id = params?.id || "1023";
+export default function OrderDetailsPage() {
+  const { id } = useParams();
+  const router = useRouter();
+  const { data: orderResponse, isLoading } = useSingleOrdersQuery(id);
+
+  if (isLoading) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-[60vh] space-y-4">
+        <Clock className="w-12 h-12 text-primary animate-spin" />
+        <p className="text-gray-500 font-medium uppercase tracking-widest text-xs">Loading Order Dossier...</p>
+      </div>
+    );
+  }
+
+  const orderData = orderResponse?.data;
+  if (!orderData) return <div className="text-center p-10 font-medium text-gray-400">Order record not found.</div>;
+
+  const { user, billingInfo, shipping } = orderData;
+
+  const getStatusStyles = (status: string) => {
+    switch (status?.toLowerCase()) {
+      case "paid":
+      case "completed":
+        return "bg-emerald-50 text-emerald-600 border-emerald-100";
+      case "pending":
+        return "bg-amber-50 text-amber-600 border-amber-100";
+      default:
+        return "bg-gray-50 text-gray-600 border-gray-100";
+    }
+  };
 
   return (
-    <div className="space-y-8 pb-10">
-      {/* Breadcrumb */}
-      <div className="flex items-center text-[15px] font-semibold text-gray-500 mb-1 space-x-2">
-        <Link href="/orders" className="hover:text-primary transition-colors text-gray-800">Orders</Link>
-        <ChevronRight className="w-5 h-5 text-gray-400" />
-        <span className="text-primary font-bold">Order Details</span>
-      </div>
-
-      {/* Header */}
-      <div className="flex flex-col md:flex-row md:items-start justify-between gap-4 mb-4">
-        <div>
-          <h1 className="text-3xl font-medium text-gray-900">Order #{id}</h1>
-          <p className="text-gray-500 text-sm font-normal mt-1">Placed on Oct 24, 2023, 10:45 AM . Via Web Portal</p>
-        </div>
-        <div className="flex items-center gap-4">
-          <Button variant="outline" className="bg-white border-gray-100 text-gray-700 hover:bg-gray-50 rounded px-5 h-12 font-medium shadow-sm transition-all active:scale-[0.98]">
-            <Download className="w-5 h-5 mr-2" />
-            Downloaded Invoice
-          </Button>
-          <Select>
-            <SelectTrigger className="bg-secondary text-white data-[placeholder]:text-white hover:bg-secondary/90 rounded px-5 !h-12 font-medium shadow-sm transition-all focus:ring-0 border-none w-auto gap-2">
-              <SelectValue placeholder="Update Status" />
-            </SelectTrigger>
-            <SelectContent align="end" className="rounded-xl p-1 border-gray-100 shadow-xl font-medium text-gray-700">
-              <SelectItem value="processing" className="cursor-pointer rounded-lg focus:bg-gray-50">Processing</SelectItem>
-              <SelectItem value="shipped" className="cursor-pointer rounded-lg focus:bg-gray-50">Shipped</SelectItem>
-              <SelectItem value="delivered" className="cursor-pointer rounded-lg focus:bg-gray-50">Delivered</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
-      </div>
-
-      {/* Info Cards Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-
-        {/* Customer Info */}
-        <div className="bg-white rounded-xl border border-gray-100 flex flex-col">
-          <h2 className="text-lg font-medium text-gray-800 mb-2 bg-blue-50 px-4 py-6">Customer Info</h2>
-          <div className="space-y-6 flex-1 p-4">
-            <div>
-              <p className="text-[13px] font-medium text-gray-500 mb-2">Name</p>
-              <p className="font-medium text-gray-900 text-base">Alex Janssen</p>
-            </div>
-            <div className="h-px bg-gray-100" />
-            <div>
-              <p className="text-[13px] font-medium text-gray-500 mb-2">Contact</p>
-              <p className="font-medium text-gray-900 text-base">alex.j@example.com</p>
-              <p className="font-medium text-gray-900 text-base mt-1">+31 6 12345678</p>
-            </div>
-            <div className="h-px bg-gray-100" />
-            <div>
-              <p className="text-[13px] font-medium text-gray-500 mb-2">Shipping Address</p>
-              <p className="font-medium text-gray-900 text-base leading-relaxed">Street 123, Floor 4 1011 AB<br />Amsterdam The Netherlands</p>
-            </div>
-          </div>
-        </div>
-
-        {/* Shipping & Payment Method */}
-        <div className="bg-white rounded-xl shadow-sm border border-gray-100 flex flex-col ">
-          <h2 className="text-lg font-medium text-gray-800 mb-2 bg-blue-50 px-4 py-6">Shipping & Payment Method</h2>
-          <div className="space-y-6 flex-1 p-4">
-            <div>
-              <p className="text-[13px] font-medium text-gray-500 mb-2">Express Delivery</p>
-              <p className="font-medium text-gray-900 text-base">Estimated: 1-2 Business Days</p>
-            </div>
-            <div className="h-px bg-gray-100" />
-            <div>
-              <p className="text-[13px] font-medium text-gray-500 mb-2">Trashing Number</p>
-              <p className="font-medium text-gray-900 text-base">MT 884920112</p>
-            </div>
-            <div className="h-px bg-gray-100" />
-            <div>
-              <p className="text-[13px] font-medium text-gray-500 mb-2">IDEAL</p>
-              <p className="font-medium text-gray-900 text-base">Transaction D: 0029311029</p>
-            </div>
-          </div>
-        </div>
-
-        {/* Billing Summery */}
-        <div className="bg-white rounded-xl shadow-sm border border-gray-100 flex flex-col">
-          <h2 className="text-lg font-medium text-gray-800 mb-2 bg-blue-50 px-4 py-6">Billing Summery</h2>
-          <div className="space-y-6 flex-1 p-4">
-            <div className="flex justify-between items-center">
-              <p className="font-semibold text-gray-600">Express Delivery</p>
-              <p className="font-bold text-gray-900">€ 758.00</p>
-            </div>
-            <div className="flex justify-between items-center">
-              <p className="font-semibold text-gray-600">Shipping (Express)</p>
-              <p className="font-bold text-gray-900">€ 12.50</p>
-            </div>
-            <div className="flex justify-between items-center">
-              <p className="font-semibold text-gray-600">Tax (VAT 21%)</p>
-              <p className="font-bold text-gray-900">€ 159.18</p>
-            </div>
-          </div>
-          <div className="flex justify-between items-center mt-auto p-4">
-            <p className="font-medium text-gray-900 text-lg">Grand Total:</p>
-            <p className="font-bold text-gray-900 text-[26px]">€ 929.68</p>
-          </div>
-        </div>
+    <div className="space-y-8">
+      {/* Navigation & Actions */}
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <Button
+          variant="ghost"
+          onClick={() => router.back()}
+          className="w-fit p-0 hover:bg-transparent text-gray-500 hover:text-primary transition-colors font-medium group"
+        >
+          <ChevronLeft className="w-5 h-5 mr-1 group-hover:-translate-x-1 transition-transform" />
+          Back to Audit Listing
+        </Button>
 
       </div>
 
-      {/* Items Ordered */}
-      <div className="mt-12 space-y-6">
-        <h2 className="text-3xl font-medium text-gray-900">Items Ordered</h2>
-
-        <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
-          <Table>
-            <TableHeader>
-              <TableRow className="hover:bg-blue-50 border-gray-50 bg-blue-50">
-                <TableHead className="py-6 px-8 text-gray-900 font-medium text-[15px] h-14">Product Name</TableHead>
-                <TableHead className="py-6 text-gray-900 font-medium text-[15px] h-14">SKU</TableHead>
-                <TableHead className="py-6 text-gray-900 font-medium text-[15px] h-14">Quantity</TableHead>
-                <TableHead className="py-6 text-gray-900 font-medium text-[15px] h-14">Unit Price</TableHead>
-                <TableHead className="py-6 px-8 text-gray-900 font-medium text-[15px] h-14">Total Price</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {[1, 2, 3].map((_, idx) => (
-                <TableRow key={idx} className="hover:bg-gray-50/50 border-gray-50">
-                  <TableCell className="py-7 px-8 flex items-center gap-5">
-                    <div className="w-14 h-14 bg-[#F2F0FF] rounded-xl flex items-center justify-center shrink-0">
-                      <CreditCard className="w-7 h-7 text-primary rotate-90" />
-                    </div>
-                    <div>
-                      <p className="font-medium text-gray-900 text-[15px]">Global Roaming SIM</p>
-                      <p className="text-sm font-semibold text-gray-500 mt-1">Universal compatibility</p>
-                    </div>
-                  </TableCell>
-                  <TableCell className="py-7 font-semibold text-gray-700">10% Off Subscription</TableCell>
-                  <TableCell className="py-7 font-semibold text-gray-700">2</TableCell>
-                  <TableCell className="py-7 font-semibold text-gray-700">€ 12.50</TableCell>
-                  <TableCell className="py-7 px-8 font-semibold text-gray-700">€ 298.00</TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
+      {/* Header Info */}
+      <div className="bg-white p-8 rounded-2xl border border-gray-100 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-6">
+        <div className="space-y-2">
+          <p className="text-[11px] text-primary font-medium uppercase tracking-[0.2em]">Transaction Registry</p>
+          <h1 className="text-3xl font-medium text-gray-900 flex items-center gap-4">
+            {billingInfo?.orderId || "Audit No Entry"}
+            <Badge className={cn("px-4 py-1.5 rounded-full border shadow-none text-[12px] uppercase tracking-wider font-medium", getStatusStyles(billingInfo?.paymentStatus))}>
+              {billingInfo?.paymentStatus}
+            </Badge>
+          </h1>
+          <div className="flex items-center gap-6 text-gray-400 font-medium">
+            <span className="flex items-center gap-1.5"><Calendar className="w-4 h-4" /> {new Date(billingInfo?.createdAt).toLocaleString()}</span>
+            <span className="flex items-center gap-1.5"><ShieldCheck className="w-4 h-4" /> Verified Transaction</span>
+          </div>
+        </div>
+        <div className="text-right">
+          <p className="text-sm text-gray-400 font-medium uppercase mb-1">Total Settlement</p>
+          <p className="text-4xl font-medium text-gray-900">€{billingInfo?.amount.toLocaleString()}</p>
         </div>
       </div>
 
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        {/* Customer Information */}
+        <Card className="border border-gray-100 shadow-sm rounded-xl overflow-hidden p-0">
+          <CardHeader className="bg-[#F8F9FC] border-b border-gray-100 p-6">
+            <CardTitle className="text-[13px] font-medium text-gray-400 uppercase tracking-widest flex items-center gap-2">
+              <User className="w-4 h-4 text-primary" /> Customer Profile
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="p-8 space-y-6">
+            <div className="flex items-center gap-4">
+              <div className="w-14 h-14 bg-blue-50 rounded-2xl flex items-center justify-center text-primary font-medium text-xl">
+                {user?.userName.charAt(0)}
+              </div>
+              <div>
+                <p className="text-lg font-medium text-gray-900">{user?.userName}</p>
+                <p className="text-sm font-medium text-gray-400 truncate max-w-[180px]">{user?.email}</p>
+              </div>
+            </div>
+            <div className="pt-6 border-t border-gray-50 space-y-4">
+              <div className="flex items-start gap-4">
+                <Mail className="w-5 h-5 text-gray-300 mt-0.5" />
+                <div>
+                  <p className="text-[11px] text-gray-400 font-medium uppercase tracking-wider">Audit Email</p>
+                  <p className="font-medium text-gray-700 text-sm">{user?.email}</p>
+                </div>
+              </div>
+              <div className="flex items-start gap-4">
+                <MapPin className="w-5 h-5 text-gray-300 mt-0.5" />
+                <div>
+                  <p className="text-[11px] text-gray-400 font-medium uppercase tracking-wider">Base Location</p>
+                  <p className="font-medium text-gray-700 text-sm">{user?.location || "Not Registered"}</p>
+                </div>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Billing Information */}
+        <Card className="border border-gray-100 shadow-sm rounded-2xl overflow-hidden p-0">
+          <CardHeader className="bg-[#F8F9FC] border-b border-gray-100 p-6">
+            <CardTitle className="text-[13px] font-medium text-gray-400 uppercase tracking-widest flex items-center gap-2">
+              <CreditCard className="w-4 h-4 text-primary" /> Financial Clearings
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="p-8 space-y-6">
+            <div className="space-y-4">
+              <div className="flex justify-between items-center py-3 border-b border-gray-50">
+                <span className="text-sm text-gray-400 font-medium">Gateway</span>
+                <span className="font-medium text-gray-900 uppercase">{billingInfo?.paymentMethod}</span>
+              </div>
+              <div className="flex justify-between items-center py-3 border-b border-gray-50">
+                <span className="text-sm text-gray-400 font-medium">Currency</span>
+                <span className="font-medium text-gray-900 uppercase">{billingInfo?.currency}</span>
+              </div>
+              <div className="flex flex-col gap-2 py-3">
+                <span className="text-[11px] text-gray-400 font-medium uppercase tracking-wider">Transaction Identification</span>
+                <code className="bg-gray-50 p-3 rounded-xl border border-gray-100 text-xs text-primary font-medium break-all">
+                  {billingInfo?.transactionId}
+                </code>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Logistics Information */}
+        <Card className="border border-gray-100 shadow-sm rounded-2xl overflow-hidden p-0">
+          <CardHeader className="bg-[#F8F9FC] border-b border-gray-100 p-6">
+            <CardTitle className="text-[13px] font-medium text-gray-400 uppercase tracking-widest flex items-center gap-2">
+              <Truck className="w-4 h-4 text-primary" /> Logistics Workflow
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="p-8 space-y-6">
+            <div className="bg-primary/[0.03] p-5 rounded-2xl border border-primary/10">
+              <p className="text-[11px] text-primary font-medium uppercase tracking-wider mb-2">Zone Allocation</p>
+              <p className="text-xl font-medium text-gray-900">{shipping?.shippingId?.name || "Global Delivery"}</p>
+              <p className="text-sm text-gray-500 font-medium mt-1">{shipping?.shippingId?.description}</p>
+            </div>
+            <div className="space-y-4">
+              <div className="flex justify-between items-center py-3 border-b border-gray-50">
+                <span className="text-sm text-gray-400 font-medium">Logistics Class</span>
+                <span className="font-medium text-gray-900 uppercase tracking-wider text-xs bg-gray-100 px-3 py-1 rounded-full">{shipping?.type}</span>
+              </div>
+              <div className="flex justify-between items-center py-3 border-b border-gray-50">
+                <span className="text-sm text-gray-400 font-medium">Surcharge Settlement</span>
+                <span className="font-medium text-gray-900">€{shipping?.cost.toLocaleString()}</span>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Audit Footnote */}
+      <div className="bg-blue-50/50 p-6 rounded-2xl border border-blue-100 flex items-start gap-4">
+        <Package className="w-6 h-6 text-primary shrink-0 mt-0.5" />
+        <div className="space-y-1">
+          <h4 className="text-sm font-medium text-gray-900">Audit Footnote</h4>
+          <p className="text-sm text-gray-600 font-medium">This transaction is logged in the administrative audit registry. All logistics surcharges were calculated based on the regional zone pricing at the time of settlement.</p>
+        </div>
+      </div>
     </div>
   );
 }

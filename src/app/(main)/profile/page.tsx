@@ -5,39 +5,42 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { cn } from "@/lib/utils";
+import { useChangePasswordMutation, useGetProfileQuery, useUpdateProfileMutation } from "@/features/profile/profileApi";
 import Image from "next/image";
-import { ChangeEvent, useRef, useState } from "react";
+import { ChangeEvent, useEffect, useRef, useState } from "react";
 import toast from "react-hot-toast";
+import { baseURL } from "@/utils/BaseURL";
 
 interface ProfileData {
-  firstName: string;
-  lastName: string;
+  userName: string;
   email: string;
   phoneNumber: string;
-  jobTitle: string;
+  location: string;
   currentPassword?: string;
   newPassword?: string;
   confirmPassword?: string;
 }
 
 interface ValidationErrors {
-  firstName?: string;
-  lastName?: string;
+  userName?: string;
   email?: string;
   phoneNumber?: string;
-  jobTitle?: string;
+  location?: string;
   currentPassword?: string;
   newPassword?: string;
   confirmPassword?: string;
 }
 
 export default function ProfilePage() {
+  const { data: profileData, isLoading: isProfileLoading } = useGetProfileQuery(undefined);
+  const [updateProfile] = useUpdateProfileMutation();
+  const [changePassword] = useChangePasswordMutation();
+
   const [formData, setFormData] = useState<ProfileData>({
-    firstName: "John",
-    lastName: "Doe",
-    email: "john@example.com",
-    phoneNumber: "+1 (555) 012-3456",
-    jobTitle: "Senior Administrator, Compliance Department",
+    userName: "",
+    email: "",
+    phoneNumber: "",
+    location: "",
     currentPassword: "",
     newPassword: "",
     confirmPassword: "",
@@ -45,7 +48,31 @@ export default function ProfilePage() {
 
   const [errors, setErrors] = useState<ValidationErrors>({});
   const [imgPreview, setImgPreview] = useState<string | null>(null);
+  console.log(imgPreview)
+  const [imageFile, setImageFile] = useState<File | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const imageUrl = (path: string) => {
+    if (!path) return "https://gratisography.com/wp-content/uploads/2024/11/gratisography-augmented-reality-800x525.jpg";
+    if (path.startsWith("http")) return path;
+    return `${baseURL}${path}`;
+  };
+
+  useEffect(() => {
+    if (profileData?.data) {
+      const { userName, email, phoneNumber, location, profile } = profileData.data;
+      setFormData((prev) => ({
+        ...prev,
+        userName: userName || "",
+        email: email || "",
+        phoneNumber: phoneNumber || "",
+        location: location || "",
+      }));
+      if (profile) {
+        setImgPreview(imageUrl(profile));
+      }
+    }
+  }, [profileData]);
 
   const handleInputChange = (e: ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -63,10 +90,10 @@ export default function ProfilePage() {
         toast.error("Image size must be less than 2MB");
         return;
       }
+      setImageFile(file);
       const reader = new FileReader();
       reader.onloadend = () => {
         setImgPreview(reader.result as string);
-        toast.success("Photo uploaded successfully!");
       };
       reader.readAsDataURL(file);
     }
@@ -74,15 +101,14 @@ export default function ProfilePage() {
 
   const validate = () => {
     const newErrors: ValidationErrors = {};
-    if (!formData.firstName.trim()) newErrors.firstName = "First name is required";
-    if (!formData.lastName.trim()) newErrors.lastName = "Last name is required";
+    if (!formData.userName.trim()) newErrors.userName = "User name is required";
     if (!formData.email.trim()) {
       newErrors.email = "Email is required";
     } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
       newErrors.email = "Please enter a valid email address";
     }
     if (!formData.phoneNumber.trim()) newErrors.phoneNumber = "Phone number is required";
-    if (!formData.jobTitle.trim()) newErrors.jobTitle = "Job title is required";
+    if (!formData.location.trim()) newErrors.location = "Location is required";
 
     if (formData.newPassword || formData.confirmPassword) {
       if (!formData.currentPassword) newErrors.currentPassword = "Current password is required to change password";
@@ -102,14 +128,44 @@ export default function ProfilePage() {
 
     const toastId = toast.loading("Updating profile...");
     try {
-      // Simulate API call
-      await new Promise((resolve) => setTimeout(resolve, 1500));
+      // 1. Handle Profile Update
+      const updateData = {
+        userName: formData.userName,
+        phoneNumber: formData.phoneNumber,
+        location: formData.location,
+      };
+
+      const profileFormData = new FormData();
+      profileFormData.append("data", JSON.stringify(updateData));
+      if (imageFile) {
+        profileFormData.append("images", imageFile);
+      }
+
+      await updateProfile(profileFormData).unwrap();
+
+      // 2. Handle Password Change if requested
+      if (formData.currentPassword && formData.newPassword) {
+        await changePassword({
+          currentPassword: formData.currentPassword,
+          newPassword: formData.newPassword,
+          confirmPassword: formData.confirmPassword,
+        }).unwrap();
+      }
+
       toast.success("Profile updated successfully!", { id: toastId });
-    } catch (error) {
-      console.log(error)
-      toast.error("Failed to update profile. Please try again.", { id: toastId });
+    } catch (error: any) {
+      console.log(error);
+      toast.error(error?.data?.message || "Failed to update profile. Please try again.", { id: toastId });
     }
   };
+
+  if (isProfileLoading) {
+    return (
+      <div className="flex h-[60vh] items-center justify-center">
+        <div className="h-10 w-10 animate-spin rounded-full border-4 border-[#1D68D5] border-t-transparent"></div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6 pb-10">
@@ -120,7 +176,7 @@ export default function ProfilePage() {
             {imgPreview ? (
               <Image src={imgPreview} fill alt="Profile Preview" className="object-cover" />
             ) : (
-              <Image src="https://gratisography.com/wp-content/uploads/2024/11/gratisography-augmented-reality-800x525.jpg" height={1000} width={1000} alt="Default Profile" className="h-full w-full object-cover" />
+              <Image src={imageUrl("")} height={1000} width={1000} alt="Default Profile" className="h-full w-full object-cover" />
             )}
           </div>
           <div className="space-y-4 sm:space-y-3 w-full">
@@ -146,6 +202,7 @@ export default function ProfilePage() {
               <Button
                 onClick={() => {
                   setImgPreview(null);
+                  setImageFile(null);
                   toast.success("Photo removed");
                 }}
                 variant="ghost"
@@ -164,34 +221,20 @@ export default function ProfilePage() {
           <h2 className="text-xl font-medium text-[#1A1D2E]">Personal Information</h2>
         </div>
         <CardContent className="p-6 sm:p-8 space-y-6 text-left">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="space-y-4">
             <div className="space-y-2">
-              <Label className="text-sm font-medium text-[#1A1D2E] ml-1">First Name</Label>
+              <Label className="text-sm font-medium text-[#1A1D2E] ml-1">User Name</Label>
               <Input
-                name="firstName"
-                value={formData.firstName}
+                name="userName"
+                value={formData.userName}
                 onChange={handleInputChange}
-                placeholder="Enter you first name here..."
+                placeholder="Enter your user name here..."
                 className={cn(
                   "h-12 bg-[#EBF2FA] border-none rounded-2xl focus-visible:ring-1 px-5 transition-all text-base",
-                  errors.firstName ? "ring-2 ring-red-500 bg-red-50/50" : "focus-visible:ring-[#1D68D5]"
+                  errors.userName ? "ring-2 ring-red-500 bg-red-50/50" : "focus-visible:ring-[#1D68D5]"
                 )}
               />
-              {errors.firstName && <p className="text-xs font-medium text-red-500 mt-1 ml-1 animate-in fade-in slide-in-from-top-1">{errors.firstName}</p>}
-            </div>
-            <div className="space-y-2">
-              <Label className="text-sm font-medium text-[#1A1D2E] ml-1">Last Name</Label>
-              <Input
-                name="lastName"
-                value={formData.lastName}
-                onChange={handleInputChange}
-                placeholder="Enter you last name here..."
-                className={cn(
-                  "h-12 bg-[#EBF2FA] border-none rounded-2xl focus-visible:ring-1 px-5 transition-all text-base",
-                  errors.lastName ? "ring-2 ring-red-500 bg-red-50/50" : "focus-visible:ring-[#1D68D5]"
-                )}
-              />
-              {errors.lastName && <p className="text-xs font-medium text-red-500 mt-1 ml-1 animate-in fade-in slide-in-from-top-1">{errors.lastName}</p>}
+              {errors.userName && <p className="text-xs font-medium text-red-500 mt-1 ml-1 animate-in fade-in slide-in-from-top-1">{errors.userName}</p>}
             </div>
           </div>
 
@@ -200,11 +243,12 @@ export default function ProfilePage() {
               <Label className="text-sm font-medium text-[#1A1D2E] ml-1">Email Address</Label>
               <Input
                 name="email"
+                readOnly
                 value={formData.email}
                 onChange={handleInputChange}
                 placeholder="Enter you email address here..."
                 className={cn(
-                  "h-12 bg-[#EBF2FA] border-none rounded-2xl focus-visible:ring-1 px-5 transition-all text-base",
+                  "h-12 bg-[#EBF2FA] border-none rounded-2xl focus-visible:ring-1 px-5 transition-all text-base opacity-70 cursor-not-allowed",
                   errors.email ? "ring-2 ring-red-500 bg-red-50/50" : "focus-visible:ring-[#1D68D5]"
                 )}
               />
@@ -227,18 +271,18 @@ export default function ProfilePage() {
           </div>
 
           <div className="space-y-2">
-            <Label className="text-sm font-medium text-[#1A1D2E] ml-1">Job Title</Label>
+            <Label className="text-sm font-medium text-[#1A1D2E] ml-1">Location</Label>
             <Input
-              name="jobTitle"
-              value={formData.jobTitle}
+              name="location"
+              value={formData.location}
               onChange={handleInputChange}
-              placeholder="Senior Administrator, Compliance Department"
+              placeholder="Location"
               className={cn(
                 "h-12 bg-[#EBF2FA] border-none rounded-2xl focus-visible:ring-1 px-5 transition-all text-base",
-                errors.jobTitle ? "ring-2 ring-red-500 bg-red-50/50" : "focus-visible:ring-[#1D68D5]"
+                errors.location ? "ring-2 ring-red-500 bg-red-50/50" : "focus-visible:ring-[#1D68D5]"
               )}
             />
-            {errors.jobTitle && <p className="text-xs font-medium text-red-500 mt-1 ml-1 animate-in fade-in slide-in-from-top-1">{errors.jobTitle}</p>}
+            {errors.location && <p className="text-xs font-medium text-red-500 mt-1 ml-1 animate-in fade-in slide-in-from-top-1">{errors.location}</p>}
           </div>
         </CardContent>
       </Card>
@@ -306,18 +350,21 @@ export default function ProfilePage() {
           variant="outline"
           className="h-12 px-10 rounded-2xl border-[#FF5B5B] text-[#FF5B5B] hover:bg-[#FF5B5B] hover:text-white transition-all font-medium w-full sm:w-auto"
           onClick={() => {
-            setFormData({
-              firstName: "John",
-              lastName: "Doe",
-              email: "john@example.com",
-              phoneNumber: "+1 (555) 012-3456",
-              jobTitle: "Senior Administrator, Compliance Department",
-              currentPassword: "",
-              newPassword: "",
-              confirmPassword: "",
-            });
+            if (profileData?.data) {
+              const { userName, email, phoneNumber, location, profile } = profileData.data;
+              setFormData({
+                userName: userName || "",
+                email: email || "",
+                phoneNumber: phoneNumber || "",
+                location: location || "",
+                currentPassword: "",
+                newPassword: "",
+                confirmPassword: "",
+              });
+              setImgPreview(profile ? process.env.NEXT_PUBLIC_BASE_URL + profile : null);
+              setImageFile(null);
+            }
             setErrors({});
-            setImgPreview(null);
             toast("Changes discarded", { icon: "🧹" });
           }}
         >

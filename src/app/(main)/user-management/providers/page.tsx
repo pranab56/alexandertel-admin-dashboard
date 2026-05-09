@@ -147,7 +147,7 @@ export default function ProvidersPage() {
                   <TableCell className="py-5 px-6 text-center">
                     <Badge
                       className={cn(
-                        "px-6 py-1.5 rounded-full font-bold text-[11px] border-none shadow-none uppercase",
+                        "px-6 py-1.5 rounded-full font-medium text-[11px] border-none shadow-none uppercase",
                         provider.credentials === "LCSV"
                           ? "bg-[#F0EDF7] text-[#9B85C4] hover:bg-[#F0EDF7]"
                           : "bg-[#E9F7F7] text-[#6BB9BA] hover:bg-[#E9F7F7]"
@@ -156,7 +156,7 @@ export default function ProvidersPage() {
                       {provider.credentials}
                     </Badge>
                   </TableCell>
-                  <TableCell className="py-5 px-6 text-center font-bold text-gray-800">{provider.licenseNumber}</TableCell>
+                  <TableCell className="py-5 px-6 text-center font-medium text-gray-800">{provider.licenseNumber}</TableCell>
                   <TableCell className="py-5 px-6 text-center font-medium text-gray-800">{provider.dateApplied}</TableCell>
                   <TableCell className="py-5 px-6 text-right">
                     <Link

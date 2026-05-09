@@ -689,7 +689,7 @@ const TipTapEditor = ({
           <button
             type="button"
             onClick={() => editor.chain().focus().toggleBold().run()}
-            className={`tiptap-toolbar-button px-2.5 sm:px-3 py-1.5 cursor-pointer sm:py-1.5 rounded text-white text-xs sm:text-sm font-bold touch-manipulation min-w-[32px] ${editor.isActive("bold") ? "active" : ""
+            className={`tiptap-toolbar-button px-2.5 sm:px-3 py-1.5 cursor-pointer sm:py-1.5 rounded text-white text-xs sm:text-sm font-medium touch-manipulation min-w-[32px] ${editor.isActive("bold") ? "active" : ""
               }`}
             title="Bold"
           >

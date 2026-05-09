@@ -12,217 +12,181 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { cn } from "@/lib/utils";
-import { Bell, CheckCircle2, Info, Trash2, XCircle } from "lucide-react";
+import { Bell, CheckCircle2, Info, Search, Trash2, Calendar } from "lucide-react";
 import { useState } from "react";
-
-type NotificationType = "info" | "success" | "warning" | "error";
-
-interface Notification {
-  id: string;
-  title: string;
-  message: string;
-  time: string;
-  type: NotificationType;
-  read: boolean;
-}
-
-const initialNotifications: Notification[] = [
-  {
-    id: "1",
-    title: "Appointment Confirmed",
-    message: "Your appointment with Dr. Rasel has been confirmed for tomorrow at 10:00 AM.",
-    time: "2 hours ago",
-    type: "success",
-    read: false,
-  },
-  {
-    id: "2",
-    title: "New Message",
-    message: "You have a new message from the lab department regarding your results.",
-    time: "5 hours ago",
-    type: "info",
-    read: false,
-  },
-  {
-    id: "3",
-    title: "Prescription Renewal",
-    message: "Your prescription for 'Amoxicillin' is ready for renewal.",
-    time: "1 day ago",
-    type: "warning",
-    read: true,
-  },
-  {
-    id: "4",
-    title: "System Update",
-    message: "The dashboard will be undergoing maintenance tonight from 2:00 AM to 4:00 AM.",
-    time: "2 days ago",
-    type: "error",
-    read: true,
-  },
-  {
-    id: "5",
-    title: "Profile Verified",
-    message: "Your professional credentials have been successfully verified.",
-    time: "3 days ago",
-    type: "success",
-    read: true,
-  },
-];
+import { useAllNotificationQuery } from "@/features/notification/notificationApi";
 
 export default function NotificationPage() {
-  const [notifications, setNotifications] = useState<Notification[]>(initialNotifications);
+  const [page, setPage] = useState(1);
+  const { data: notificationResponse, isLoading } = useAllNotificationQuery({ page, limit: 10 });
 
-  const deleteNotification = (id: string) => {
-    setNotifications(notifications.filter((n) => n.id !== id));
+  const notifications = notificationResponse?.data?.result || [];
+  const meta = notificationResponse?.data?.meta || { total: 0, limit: 10, page: 1, totalPage: 1 };
+
+  const formatDate = (dateString: string) => {
+    const date = new Date(dateString);
+    return date.toLocaleString('en-US', {
+      month: 'short',
+      day: 'numeric',
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
+    });
   };
 
-  const clearAll = () => {
-    setNotifications([]);
-  };
-
-  const markAsRead = (id: string) => {
-    setNotifications(
-      notifications.map((n) => (n.id === id ? { ...n, read: true } : n))
-    );
-  };
-
-  const getTypeIcon = (type: NotificationType) => {
-    switch (type) {
-      case "success":
-        return <CheckCircle2 className="w-5 h-5 text-emerald-500" />;
-      case "info":
-        return <Info className="w-5 h-5 text-blue-500" />;
-      case "warning":
-        return <Bell className="w-5 h-5 text-amber-500" />;
-      case "error":
-        return <XCircle className="w-5 h-5 text-rose-500" />;
-    }
-  };
-
-  const getTypeStyles = (type: NotificationType) => {
-    switch (type) {
-      case "success":
-        return "bg-emerald-50 text-emerald-700 border-emerald-100";
-      case "info":
-        return "bg-blue-50 text-blue-700 border-blue-100";
-      case "warning":
-        return "bg-amber-50 text-amber-700 border-amber-100";
-      case "error":
-        return "bg-rose-50 text-rose-700 border-rose-100";
-    }
+  const getTimeAgo = (dateString: string) => {
+    const seconds = Math.floor((new Date().getTime() - new Date(dateString).getTime()) / 1000);
+    let interval = seconds / 31536000;
+    if (interval > 1) return Math.floor(interval) + " years ago";
+    interval = seconds / 2592000;
+    if (interval > 1) return Math.floor(interval) + " months ago";
+    interval = seconds / 86400;
+    if (interval > 1) return Math.floor(interval) + " days ago";
+    interval = seconds / 3600;
+    if (interval > 1) return Math.floor(interval) + " hours ago";
+    interval = seconds / 60;
+    if (interval > 1) return Math.floor(interval) + " minutes ago";
+    return Math.floor(seconds) + " seconds ago";
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 pb-10">
       <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
         <div className="space-y-1">
-          <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 tracking-tight">Notifications</h1>
-          <p className="text-sm sm:text-base text-muted-foreground">Manage and stay updated with your latest alerts.</p>
-        </div>
-        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
-          <Button
-            variant="outline"
-            onClick={() => setNotifications(notifications.map(n => ({ ...n, read: true })))}
-            className="w-full sm:w-auto rounded-xl sm:rounded-full px-6 border-[#6C63FF] text-[#6C63FF] hover:bg-[#6C63FF]/10 shadow-sm transition-all"
-          >
-            Mark all as read
-          </Button>
-          <Button
-            variant="destructive"
-            onClick={clearAll}
-            className="w-full sm:w-auto rounded-xl sm:rounded-full px-6 bg-[#FF5858] hover:bg-[#ff4545] shadow-md border-none transition-all"
-          >
-            Clear All
-          </Button>
+          <h1 className="text-2xl font-medium text-gray-900 tracking-tight">Notifications</h1>
+          <p className="text-gray-500 font-medium">Keep track of yours and your customer activity.</p>
         </div>
       </div>
 
-      <Card className="border-none shadow-xl bg-white/50 backdrop-blur-xl rounded-xl overflow-hidden p-0">
-        <CardHeader className="bg-gradient-to-r from-[#6C63FF]/10 to-[#6C63FF]/5 border-b border-gray-100">
-          <CardTitle className="text-lg font-semibold flex items-center gap-2 pt-5">
-            <Bell className="w-5 h-5 text-[#6C63FF]" />
+      <Card className="border border-gray-100 shadow-sm bg-white rounded-lg overflow-hidden p-0">
+        <CardHeader className="bg-[#F8F9FC] border-b border-gray-100 p-6">
+          <CardTitle className="text-lg font-medium flex items-center gap-2">
+            <Bell className="w-5 h-5 text-primary" />
             Recent Activity
-            <Badge variant="secondary" className="ml-2 bg-[#6C63FF] text-white rounded-full">
-              {notifications.length} Total
+            <Badge variant="secondary" className="ml-2 bg-primary text-white rounded-full px-3 py-0.5 border-none font-medium">
+              {meta.total} Total
             </Badge>
           </CardTitle>
         </CardHeader>
-        <CardContent className="p-0 overflow-hidden">
-          <div className="relative overflow-x-auto CustomScrollbar">
-            <Table className="min-w-[500px] md:min-w-full">
+        <CardContent className="p-0">
+          <div className="overflow-x-auto">
+            <Table>
               <TableHeader className="bg-gray-50/50">
                 <TableRow className="hover:bg-transparent border-gray-100">
-                  <TableHead className="w-[60px] sm:w-[80px] text-center">Status</TableHead>
-                  <TableHead className="min-w-[200px] py-4">Notification</TableHead>
-                  <TableHead className="hidden md:table-cell">Type</TableHead>
-                  <TableHead className="hidden sm:table-cell text-right">Time</TableHead>
-                  <TableHead className="w-[80px] sm:w-[100px] text-right pr-6">Action</TableHead>
+                  <TableHead className="w-[80px] text-center font-medium text-gray-900">Icon</TableHead>
+                  <TableHead className="py-4 font-medium text-gray-900">Message</TableHead>
+                  <TableHead className="font-medium text-gray-900">Date & Time</TableHead>
+                  <TableHead className="text-right pr-8 font-medium text-gray-900">Status</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {notifications.length > 0 ? (
-                  notifications.map((notification) => (
+                {isLoading ? (
+                  Array.from({ length: 5 }).map((_, i) => (
+                    <TableRow key={i} className="animate-pulse">
+                      <TableCell colSpan={4} className="h-20 bg-gray-50/50" />
+                    </TableRow>
+                  ))
+                ) : notifications.length > 0 ? (
+                  notifications.map((notification: any) => (
                     <TableRow
-                      key={notification.id}
+                      key={notification._id}
                       className={cn(
-                        "group transition-colors border-gray-50 cursor-pointer",
-                        !notification.read ? "bg-blue-50/30 font-medium" : "bg-transparent"
+                        "group transition-colors border-gray-50",
+                        !notification.read ? "bg-primary/[0.02]" : "bg-transparent"
                       )}
-                      onClick={() => markAsRead(notification.id)}
                     >
-                      <TableCell className="text-center py-4">
+                      <TableCell className="text-center py-5">
                         <div className="flex justify-center">
-                          {getTypeIcon(notification.type)}
+                          <div className={cn(
+                            "w-10 h-10 rounded-full flex items-center justify-center",
+                            notification.type === "ADMIN" ? "bg-blue-50" : "bg-orange-50"
+                          )}>
+                            {notification.type === "ADMIN" ? (
+                              <Bell className="w-5 h-5 text-blue-500" />
+                            ) : (
+                              <Info className="w-5 h-5 text-orange-500" />
+                            )}
+                          </div>
                         </div>
                       </TableCell>
-                      <TableCell className="py-4">
-                        <div className="flex flex-col gap-0.5">
-                          <span className="text-sm font-semibold text-gray-900 leading-tight">{notification.title}</span>
-                          <span className="text-[12px] text-muted-foreground line-clamp-2 sm:line-clamp-1">{notification.message}</span>
-                          {/* Mobile only time display */}
-                          <span className="sm:hidden text-[10px] text-muted-foreground mt-1">{notification.time}</span>
+                      <TableCell className="py-5">
+                        <div className="flex flex-col gap-1">
+                          <span className="text-[15px] font-medium text-gray-900 leading-snug">{notification.text}</span>
+                          <span className="text-[12px] text-gray-400 font-medium uppercase tracking-wider">{getTimeAgo(notification.createdAt)}</span>
                         </div>
                       </TableCell>
-                      <TableCell className="hidden md:table-cell py-4">
-                        <Badge className={cn("capitalize font-normal rounded-full px-3 py-0.5 border text-[11px]", getTypeStyles(notification.type))}>
-                          {notification.type}
+                      <TableCell className="py-5">
+                        <div className="flex items-center gap-2 text-gray-600 font-medium text-sm">
+                          <Calendar className="w-4 h-4 text-gray-400" />
+                          {formatDate(notification.createdAt)}
+                        </div>
+                      </TableCell>
+                      <TableCell className="text-right pr-8 py-5">
+                        <Badge className={cn(
+                          "rounded-full px-4 py-1.5 font-medium border-none shadow-none text-[12px]",
+                          notification.read
+                            ? "bg-gray-100 text-gray-400"
+                            : "bg-[#E6F9F0] text-[#2DC766]"
+                        )}>
+                          {notification.read ? "Viewed" : "New"}
                         </Badge>
-                      </TableCell>
-                      <TableCell className="hidden sm:table-cell text-right text-xs text-muted-foreground py-4">
-                        {notification.time}
-                      </TableCell>
-                      <TableCell className="text-right pr-6 py-4">
-                        <div className="flex items-center justify-end gap-2">
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              deleteNotification(notification.id);
-                            }}
-                            className="w-8 h-8 sm:w-9 sm:h-9 text-rose-500 hover:text-rose-600 hover:bg-rose-50 rounded-xl"
-                          >
-                            <Trash2 className="w-4 h-4" />
-                          </Button>
-                        </div>
                       </TableCell>
                     </TableRow>
                   ))
                 ) : (
                   <TableRow>
-                    <TableCell colSpan={5} className="h-64 text-center">
+                    <TableCell colSpan={4} className="h-64 text-center">
                       <div className="flex flex-col items-center justify-center text-muted-foreground">
                         <div className="p-4 rounded-full bg-gray-50 mb-3">
-                          <Bell className="w-12 h-12 text-gray-300" />
+                          <Bell className="w-12 h-12 text-gray-200" />
                         </div>
                         <p className="text-lg font-medium text-gray-400">No notifications found</p>
-                        <p className="text-sm">You&apos;re all caught up!</p>
+                        <p className="text-sm font-medium">You&apos;re all caught up with the updates!</p>
                       </div>
                     </TableCell>
                   </TableRow>
                 )}
               </TableBody>
             </Table>
+          </div>
+
+          {/* Pagination */}
+          <div className="p-8 border-t border-gray-100 flex flex-col md:flex-row items-center justify-between gap-4 bg-white">
+            <p className="text-gray-500 font-medium text-sm">Showing {notifications.length} of {meta.total} Notifications</p>
+            <div className="flex items-center gap-2">
+              <Button
+                variant="ghost"
+                className="text-gray-400 font-medium hover:bg-transparent text-[15px]"
+                disabled={meta.page === 1}
+                onClick={() => setPage(page - 1)}
+              >
+                Prev
+              </Button>
+              <div className="flex items-center gap-2 px-2">
+                {Array.from({ length: meta.totalPage }, (_, i) => i + 1).map((pageNum) => (
+                  <Button
+                    key={pageNum}
+                    onClick={() => setPage(pageNum)}
+                    className={cn(
+                      "w-10 h-10 p-0 rounded-lg font-medium transition-all",
+                      meta.page === pageNum
+                        ? "bg-primary text-white hover:bg-primary/90 shadow-md"
+                        : "bg-white border border-gray-100 text-gray-600 hover:bg-gray-50"
+                    )}
+                  >
+                    {pageNum}
+                  </Button>
+                ))}
+              </div>
+              <Button
+                variant="ghost"
+                className="text-gray-400 font-medium hover:bg-transparent text-[15px]"
+                disabled={meta.page === meta.totalPage}
+                onClick={() => setPage(page + 1)}
+              >
+                Next
+              </Button>
+            </div>
           </div>
         </CardContent>
       </Card>

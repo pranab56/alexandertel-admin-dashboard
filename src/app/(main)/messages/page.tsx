@@ -224,7 +224,7 @@ export default function MessagesPage() {
       )}>
         <div className="p-6 md:p-8 flex flex-col gap-6 shrink-0">
           <div className="flex items-center justify-between">
-            <h1 className="text-xl md:text-2xl font-bold text-[#2D2D2D]">Message</h1>
+            <h1 className="text-xl md:text-2xl font-medium text-[#2D2D2D]">Message</h1>
             <Button
               variant="ghost"
               size="icon"
@@ -259,7 +259,7 @@ export default function MessagesPage() {
         <ScrollArea className="flex-1 overflow-y-auto">
           {/* Pinned Messages */}
           <div className="px-4 md:px-6 mb-8">
-            <div className="flex items-center gap-2 text-slate-400 text-[11px] md:text-[13px] font-bold uppercase tracking-wider mb-5 px-2">
+            <div className="flex items-center gap-2 text-slate-400 text-[11px] md:text-[13px] font-medium uppercase tracking-wider mb-5 px-2">
               <Pin className="h-4 w-4" />
               Pinned Message
             </div>
@@ -277,7 +277,7 @@ export default function MessagesPage() {
 
           {/* All Messages */}
           <div className="px-4 md:px-6 pb-8">
-            <div className="flex items-center gap-2 text-slate-400 text-[11px] md:text-[13px] font-bold uppercase tracking-wider mb-5 px-2">
+            <div className="flex items-center gap-2 text-slate-400 text-[11px] md:text-[13px] font-medium uppercase tracking-wider mb-5 px-2">
               <Mail className="h-4 w-4" />
               All Message
             </div>
@@ -327,11 +327,11 @@ export default function MessagesPage() {
               )}
             </div>
             <div className="flex flex-col">
-              <h2 className="text-base md:text-lg font-bold text-[#2D2D2D] truncate max-w-[120px] sm:max-w-none">{selectedChat.name}</h2>
+              <h2 className="text-base md:text-lg font-medium text-[#2D2D2D] truncate max-w-[120px] sm:max-w-none">{selectedChat.name}</h2>
               <span className="text-[11px] md:text-[13px] text-slate-400 font-medium">Psychologist . Active 5m ago</span>
             </div>
           </div>
-          <Button className="h-10 md:h-12 px-4 md:px-8 bg-[#9B8FC7] cursor-pointer hover:bg-[#8A79B8] text-white rounded-xl text-xs md:text-sm font-bold transition-all shadow-lg shadow-[#9B8FC7]/20">
+          <Button className="h-10 md:h-12 px-4 md:px-8 bg-[#9B8FC7] cursor-pointer hover:bg-[#8A79B8] text-white rounded-xl text-xs md:text-sm font-medium transition-all shadow-lg shadow-[#9B8FC7]/20">
             Book Session
           </Button>
         </div>
@@ -340,7 +340,7 @@ export default function MessagesPage() {
         <ScrollArea className="flex-1 p-4 md:p-8 bg-[#F8F9FB] overflow-y-auto">
           <div className="max-w-4xl mx-auto space-y-6 md:space-y-10">
             <div className="flex justify-center">
-              <span className="px-4 md:px-5 py-1 md:py-1.5 bg-white rounded-full text-[11px] md:text-[13px] font-bold text-slate-400 shadow-sm border border-slate-100/50">
+              <span className="px-4 md:px-5 py-1 md:py-1.5 bg-white rounded-full text-[11px] md:text-[13px] font-medium text-slate-400 shadow-sm border border-slate-100/50">
                 Today
               </span>
             </div>
@@ -365,7 +365,7 @@ export default function MessagesPage() {
                     msg.isMe ? "items-end" : "items-start"
                   )}>
                     <div className="flex items-center gap-2 md:gap-3 px-1">
-                      <span className="text-[13px] md:text-[14px] font-bold text-[#2D2D2D]">{msg.senderName}</span>
+                      <span className="text-[13px] md:text-[14px] font-medium text-[#2D2D2D]">{msg.senderName}</span>
                       <span className="text-[10px] md:text-[12px] text-slate-400 font-medium">{msg.time}</span>
                     </div>
                     <div className={cn(
@@ -463,7 +463,7 @@ function ChatListItem({ chat, isActive, onClick }: { chat: Chat, isActive: boole
       </div>
       <div className="flex-1 min-w-0">
         <div className="flex items-center justify-between gap-2">
-          <h3 className="text-[14px] md:text-[15px] font-bold text-[#2D2D2D] truncate">{chat.name}</h3>
+          <h3 className="text-[14px] md:text-[15px] font-medium text-[#2D2D2D] truncate">{chat.name}</h3>
           <span className="text-[10px] md:text-[11px] font-medium text-[#9B8FC7] whitespace-nowrap">{chat.time}</span>
         </div>
         <div className="flex items-center justify-between gap-2 mt-0.5">

@@ -39,7 +39,7 @@ export default function LineChart() {
         <CardHeader className="flex flex-row items-center justify-between pb-2">
           <div className="space-y-1">
             <CardTitle className="text-lg font-semibold text-gray-500">User Growth</CardTitle>
-            <p className="text-3xl font-bold text-gray-800">12.8k</p>
+            <p className="text-3xl font-medium text-gray-800">12.8k</p>
           </div>
           <Select defaultValue="last-week">
             <SelectTrigger className="w-[124px] bg-[#F9FAFB] border-[#E5E7EB] text-gray-600 rounded-lg">

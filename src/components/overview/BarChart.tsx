@@ -40,7 +40,7 @@ export default function BarChart() {
         <CardHeader className="flex flex-row items-center justify-between pb-2">
           <div className="space-y-1">
             <CardTitle className="text-lg font-semibold text-gray-500">Appointments Trend</CardTitle>
-            <p className="text-3xl font-bold text-gray-800">12.8k</p>
+            <p className="text-3xl font-medium text-gray-800">12.8k</p>
           </div>
           <Select defaultValue="last-week">
             <SelectTrigger className="w-[124px] bg-[#F9FAFB] border-[#E5E7EB] text-gray-600 rounded-lg">
@@ -76,7 +76,7 @@ export default function BarChart() {
                     return (
                       <div className="relative mb-2">
                         <div className="bg-[#1F1F1F] text-white px-4 py-2 rounded-lg shadow-2xl text-center min-w-[90px]">
-                          <p className="text-sm font-bold">{payload[0].value}k</p>
+                          <p className="text-sm font-medium">{payload[0].value}k</p>
                           <p className="text-[10px] opacity-60 font-medium">
                             {payload[0].payload.day}
                           </p>

@@ -173,7 +173,7 @@ export default function IntakeFormManagement() {
       <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
         <DialogContent className="sm:max-w-[600px] p-0 overflow-hidden rounded-2xl gap-0">
           <DialogHeader className="p-6 bg-white border-b">
-            <DialogTitle className="flex items-center gap-2 text-xl font-bold text-gray-900">
+            <DialogTitle className="flex items-center gap-2 text-xl font-medium text-gray-900">
               {editingField ? "Edit Field" : "Add Field"}
             </DialogTitle>
           </DialogHeader>
@@ -243,7 +243,7 @@ export default function IntakeFormManagement() {
       <AlertDialog open={isDeleteModalOpen} onOpenChange={setIsDeleteModalOpen}>
         <AlertDialogContent className="rounded-2xl border-none p-8 max-w-md">
           <AlertDialogHeader>
-            <AlertDialogTitle className="text-2xl font-bold text-gray-900">Are you absolutely sure?</AlertDialogTitle>
+            <AlertDialogTitle className="text-2xl font-medium text-gray-900">Are you absolutely sure?</AlertDialogTitle>
             <AlertDialogDescription className="text-gray-500 text-base mt-2">
               This action cannot be undone. This will permanently delete the intake field
               from this form.
@@ -277,7 +277,7 @@ function SelectionView({ onViewSelect }: { onViewSelect: (view: "client" | "prov
       className="space-y-8 max-w-5xl  py-10"
     >
       <div className="space-y-2">
-        <h1 className="text-2xl font-bold text-gray-900">Intake Form Management</h1>
+        <h1 className="text-2xl font-medium text-gray-900">Intake Form Management</h1>
         <p className="text-gray-500 max-w-2xl">
           Configure and customize intake forms for clients and providers, manage shared
           clinical fields, and define global option sets for the entire platform.
@@ -292,7 +292,7 @@ function SelectionView({ onViewSelect }: { onViewSelect: (view: "client" | "prov
               <div className="w-16 h-16 rounded-2xl bg-[#D0EBEB] flex items-center justify-center text-[#6BB9BA]">
                 <Users className="w-8 h-8" />
               </div>
-              <span className="text-[#6BB9BA] font-bold text-lg">CLIENT</span>
+              <span className="text-[#6BB9BA] font-medium text-lg">CLIENT</span>
             </div>
           </div>
           <CardHeader>

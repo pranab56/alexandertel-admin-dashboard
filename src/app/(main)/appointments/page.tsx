@@ -152,7 +152,7 @@ export default function AppointmentsPage() {
             <TableBody>
               {appointments.map((apt, index) => (
                 <TableRow key={index} className="border-b border-gray-50 hover:bg-gray-50/50 transition-colors">
-                  <TableCell className="py-5 px-6 font-bold text-gray-800">{apt.id}</TableCell>
+                  <TableCell className="py-5 px-6 font-medium text-gray-800">{apt.id}</TableCell>
                   <TableCell className="py-5 px-6">
                     <div className="flex flex-col">
                       <span className="font-medium text-gray-800">{apt.date}</span>

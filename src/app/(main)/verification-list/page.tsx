@@ -109,7 +109,7 @@ export default function VerificationList() {
       <Card className="border-none shadow-[0_2px_15px_-3px_rgba(0,0,0,0.07),0_10px_20px_-2px_rgba(0,0,0,0.04)] bg-white rounded-2xl overflow-hidden">
         <CardContent className="p-0">
           <div className="p-6 sm:p-8">
-            <h1 className="text-xl sm:text-2xl font-bold text-[#213F7D]">Verification List</h1>
+            <h1 className="text-xl sm:text-2xl font-medium text-[#213F7D]">Verification List</h1>
           </div>
 
           <div className="overflow-x-auto w-full">
@@ -168,7 +168,7 @@ export default function VerificationList() {
               <button className="p-2 rounded-lg border border-gray-200 text-[#718096] hover:bg-gray-50 transition-all">
                 <ChevronLeft className="w-4 h-4 sm:w-5 sm:h-5" />
               </button>
-              <button className="w-8 h-8 sm:w-10 sm:h-10 rounded-lg bg-[#1E61D5] text-white font-bold shadow-md shadow-blue-200 text-sm sm:text-base">1</button>
+              <button className="w-8 h-8 sm:w-10 sm:h-10 rounded-lg bg-[#1E61D5] text-white font-medium shadow-md shadow-blue-200 text-sm sm:text-base">1</button>
               <button className="w-8 h-8 sm:w-10 sm:h-10 rounded-lg text-[#718096] hover:bg-gray-50 transition-all font-medium text-sm sm:text-base">2</button>
               <button className="w-8 h-8 sm:w-10 sm:h-10 rounded-lg text-[#718096] hover:bg-gray-50 transition-all font-medium text-sm sm:text-base">3</button>
               <span className="px-1 sm:px-2 text-[#718096]">...</span>
@@ -186,7 +186,7 @@ export default function VerificationList() {
         <SheetContent className="w-full sm:max-w-[500px] p-0 border-none">
           <div className="h-full flex flex-col overflow-hidden">
             <SheetHeader className="p-6 sm:p-8 border-b border-gray-50 flex-row items-center justify-between space-y-0">
-              <SheetTitle className="text-xl sm:text-2xl font-bold text-[#213F7D]">Document Info</SheetTitle>
+              <SheetTitle className="text-xl sm:text-2xl font-medium text-[#213F7D]">Document Info</SheetTitle>
               <SheetClose className="rounded-full p-2 hover:bg-gray-100 transition-colors">
                 <X className="w-5 h-5 sm:w-6 sm:h-6 text-[#213F7D]" />
               </SheetClose>
@@ -196,29 +196,29 @@ export default function VerificationList() {
               {/* Info Grid */}
               <div className="grid grid-cols-1 xs:grid-cols-2 gap-x-6 gap-y-8 sm:gap-x-8 sm:gap-y-10">
                 <div className="space-y-1">
-                  <p className="text-lg sm:text-xl font-bold text-[#213F7D]">Document ID</p>
+                  <p className="text-lg sm:text-xl font-medium text-[#213F7D]">Document ID</p>
                   <p className="text-sm sm:text-base text-gray-500">{selectedDoc?.id}</p>
                 </div>
                 <div className="space-y-1">
-                  <p className="text-lg sm:text-xl font-bold text-[#213F7D]">Document Type</p>
+                  <p className="text-lg sm:text-xl font-medium text-[#213F7D]">Document Type</p>
                   <p className="text-sm sm:text-base text-gray-500">{selectedDoc?.type}</p>
                 </div>
                 <div className="space-y-1">
-                  <p className="text-lg sm:text-xl font-bold text-[#213F7D]">Issuing Authority</p>
+                  <p className="text-lg sm:text-xl font-medium text-[#213F7D]">Issuing Authority</p>
                   <p className="text-sm sm:text-base text-gray-500">{selectedDoc?.authority}</p>
                 </div>
                 <div className="space-y-1">
-                  <p className="text-lg sm:text-xl font-bold text-[#213F7D]">Date Submitted</p>
+                  <p className="text-lg sm:text-xl font-medium text-[#213F7D]">Date Submitted</p>
                   <p className="text-sm sm:text-base text-gray-500">{selectedDoc?.dateSubmitted}</p>
                 </div>
                 <div className="xs:col-span-2 space-y-1">
-                  <p className="text-lg sm:text-xl font-bold text-[#213F7D]">Submitted</p>
+                  <p className="text-lg sm:text-xl font-medium text-[#213F7D]">Submitted</p>
                   <p className="text-sm sm:text-base text-gray-500">{selectedDoc?.user} (ID: {selectedDoc?.userId})</p>
-                </div> 
+                </div>
               </div>
 
               <div className="border-t border-gray-100 pt-8 sm:pt-10">
-                <h3 className="text-xl sm:text-2xl font-bold text-[#213F7D] mb-6 sm:mb-8">Verification Checklist</h3>
+                <h3 className="text-xl sm:text-2xl font-medium text-[#213F7D] mb-6 sm:mb-8">Verification Checklist</h3>
 
                 <div className="space-y-3 sm:space-y-4">
                   {[
@@ -244,13 +244,13 @@ export default function VerificationList() {
             <div className="p-6 sm:p-8 border-t border-gray-50 flex flex-col xs:flex-row gap-3 sm:gap-4 mt-auto">
               <Button
                 variant="outline"
-                className="w-full xs:flex-1 h-12 sm:h-14 rounded-xl border-[#FF4B4B] text-[#FF4B4B] hover:bg-[#FF4B4B] hover:text-white transition-all text-sm sm:text-base font-bold"
+                className="w-full xs:flex-1 h-12 sm:h-14 rounded-xl border-[#FF4B4B] text-[#FF4B4B] hover:bg-[#FF4B4B] hover:text-white transition-all text-sm sm:text-base font-medium"
                 onClick={() => setIsSheetOpen(false)}
               >
                 Reject
               </Button>
               <Button
-                className="w-full xs:flex-[1.5] h-12 sm:h-14 rounded-xl bg-[#1E61D5] hover:bg-[#164bbd] text-white transition-all text-sm sm:text-base font-bold px-4 sm:px-8"
+                className="w-full xs:flex-[1.5] h-12 sm:h-14 rounded-xl bg-[#1E61D5] hover:bg-[#164bbd] text-white transition-all text-sm sm:text-base font-medium px-4 sm:px-8"
                 onClick={() => setIsSheetOpen(false)}
               >
                 Approve Document

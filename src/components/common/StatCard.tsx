@@ -38,7 +38,7 @@ function StatCard({
           >
             {renderIcon()}
           </div>
-          <div className="text-3xl font-bold text-gray-900">{value}</div>
+          <div className="text-3xl font-medium text-gray-900">{value}</div>
         </div>
         <div className={`${textColor} text-base font-medium`}>{label}</div>
       </div>

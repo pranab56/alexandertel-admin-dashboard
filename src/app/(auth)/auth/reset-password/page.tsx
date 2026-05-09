@@ -3,9 +3,11 @@
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { useResetPasswordMutation } from "@/features/auth/authApi";
 import { cn } from "@/lib/utils";
 import { ArrowRight, Eye, EyeOff } from "lucide-react";
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 import { FormEvent, useState } from "react";
 import toast from "react-hot-toast";
 
@@ -18,8 +20,13 @@ export default function ResetPassword() {
     password?: string;
     confirmPassword?: string;
   }>({});
-  const [isLoading, setIsLoading] = useState(false);
+
   const [isSuccess, setIsSuccess] = useState(false);
+  const searchParams = useSearchParams();
+  const token = searchParams.get("token");
+  console.log(token)
+  const [resetPassword, { isLoading }] = useResetPasswordMutation();
+
 
   const validate = () => {
     const newErrors: { password?: string; confirmPassword?: string } = {};
@@ -43,17 +50,17 @@ export default function ResetPassword() {
 
     if (!validate()) return;
 
-    setIsLoading(true);
+
     try {
       // Simulate API call
-      await new Promise((resolve) => setTimeout(resolve, 1500));
-      setIsSuccess(true);
-      toast.success("Password reset successful!");
-    } catch (error) {
-      console.error("Reset error:", error);
-      toast.error("An error occurred. Please try again.");
-    } finally {
-      setIsLoading(false);
+      const res = await resetPassword({ token: token, newPassword: password, confirmPassword: confirmPassword }).unwrap();
+      if (res.success) {
+        toast.success(res.message);
+        setIsSuccess(true);
+      }
+    } catch (error: any) {
+      console.error("Reset error:", error?.message);
+      toast.error(error?.message);
     }
   };
 

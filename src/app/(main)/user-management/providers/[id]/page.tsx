@@ -33,7 +33,7 @@ const providerData = {
 
 const InfoItem = ({ label, value, isEmail }: { label: string; value: string; isEmail?: boolean }) => (
   <div className="space-y-1.5">
-    <p className="text-[11px] font-bold text-gray-400 uppercase tracking-tight">{label}</p>
+    <p className="text-[11px] font-medium text-gray-400 uppercase tracking-tight">{label}</p>
     <p className={cn("text-[15px] font-medium leading-relaxed", isEmail ? "text-[#9B85C4]" : "text-gray-800")}>
       {value}
     </p>
@@ -70,7 +70,7 @@ export default function ProviderDetailsPage() {
               <div className="absolute -bottom-1 -right-1 w-5 h-5 bg-green-500 border-4 border-white rounded-full shadow-sm" />
             </div>
             <div className="space-y-2 text-center sm:text-left">
-              <h1 className="text-xl sm:text-2xl font-bold text-gray-800 tracking-tight">{providerData.name}</h1>
+              <h1 className="text-xl sm:text-2xl font-medium text-gray-800 tracking-tight">{providerData.name}</h1>
               <div className="flex flex-wrap items-center justify-center sm:justify-start gap-x-3 gap-y-1 text-sm font-medium text-gray-500">
                 <span>NPI: {providerData.npi}</span>
                 <span className="hidden sm:inline text-gray-300">•</span>
@@ -96,7 +96,7 @@ export default function ProviderDetailsPage() {
           >
             <Card className="border-none shadow-sm bg-white h-fit">
               <CardHeader className="pb-4 pt-8 px-6 sm:px-8">
-                <CardTitle className="text-lg font-bold text-gray-700 tracking-tight">Personal Information</CardTitle>
+                <CardTitle className="text-lg font-medium text-gray-700 tracking-tight">Personal Information</CardTitle>
               </CardHeader>
               <CardContent className="p-6 sm:p-8 pt-0">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-y-8 gap-x-12">
@@ -117,7 +117,7 @@ export default function ProviderDetailsPage() {
           >
             <Card className="border-none shadow-sm bg-white">
               <CardHeader className="pb-4 pt-8 px-6 sm:px-8">
-                <CardTitle className="text-lg font-bold text-gray-700 tracking-tight">Professional Credentials</CardTitle>
+                <CardTitle className="text-lg font-medium text-gray-700 tracking-tight">Professional Credentials</CardTitle>
               </CardHeader>
               <CardContent className="p-6 sm:p-8 pt-0 space-y-8">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-y-8 gap-x-12 pb-6 border-b border-gray-50">
@@ -125,7 +125,7 @@ export default function ProviderDetailsPage() {
                   <InfoItem label="License Number" value={providerData.credentials.licenseNumber} />
                 </div>
                 <div className="space-y-3">
-                  <p className="text-[11px] font-bold text-gray-400 uppercase tracking-tight">Bio Statement</p>
+                  <p className="text-[11px] font-medium text-gray-400 uppercase tracking-tight">Bio Statement</p>
                   <p className="text-sm text-gray-600 leading-relaxed font-normal">
                     {providerData.credentials.bio}
                   </p>
@@ -143,7 +143,7 @@ export default function ProviderDetailsPage() {
         >
           <Card className="border-none shadow-sm bg-white h-full">
             <CardHeader className="pb-4 pt-8 px-6 sm:px-8">
-              <CardTitle className="text-lg font-bold text-gray-700 tracking-tight">Verification Documents</CardTitle>
+              <CardTitle className="text-lg font-medium text-gray-700 tracking-tight">Verification Documents</CardTitle>
             </CardHeader>
             <CardContent className="p-6 sm:p-8 pt-0 space-y-8">
               {providerData.documents.map((doc, index) => (
@@ -171,12 +171,12 @@ export default function ProviderDetailsPage() {
       >
         <Button
           variant="outline"
-          className="w-full sm:w-auto h-12 px-10 rounded-xl border-[#FF5858] text-[#FF5858] font-bold hover:bg-[#FF5858] hover:text-white transition-all active:scale-[0.98]"
+          className="w-full sm:w-auto h-12 px-10 rounded-xl border-[#FF5858] text-[#FF5858] font-medium hover:bg-[#FF5858] hover:text-white transition-all active:scale-[0.98]"
         >
           Reject Application
         </Button>
         <Button
-          className="w-full sm:w-auto h-12 px-10 rounded-xl bg-[#9B85C4] hover:bg-[#826AB4] text-white font-bold transition-all active:scale-[0.98] shadow-lg shadow-purple-100"
+          className="w-full sm:w-auto h-12 px-10 rounded-xl bg-[#9B85C4] hover:bg-[#826AB4] text-white font-medium transition-all active:scale-[0.98] shadow-lg shadow-purple-100"
         >
           Approve Provider
         </Button>

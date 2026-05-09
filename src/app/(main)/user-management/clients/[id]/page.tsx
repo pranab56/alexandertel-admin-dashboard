@@ -43,7 +43,7 @@ const clientData = {
 
 const InfoItem = ({ label, value, isEmail }: { label: string; value: string; isEmail?: boolean }) => (
   <div className="space-y-1.5">
-    <p className="text-[11px] font-bold text-gray-400 uppercase tracking-wider">{label}</p>
+    <p className="text-[11px] font-medium text-gray-400 uppercase tracking-wider">{label}</p>
     <p className={cn("text-sm font-medium", isEmail ? "text-[#9B85C4]" : "text-gray-700")}>
       {value}
     </p>
@@ -80,7 +80,7 @@ export default function ClientDetailsPage() {
               </Avatar>
             </div>
             <div className="space-y-1">
-              <h1 className="text-3xl font-bold text-gray-800">{clientData.name}</h1>
+              <h1 className="text-3xl font-medium text-gray-800">{clientData.name}</h1>
               <p className="text-sm font-medium text-gray-400">Client ID: #{clientData.id}</p>
               <p className="text-sm font-medium text-gray-400">Member since: {clientData.memberSince}</p>
             </div>
@@ -99,7 +99,7 @@ export default function ClientDetailsPage() {
           >
             <Card className="border-none shadow-sm">
               <CardHeader className="pb-4">
-                <CardTitle className="text-lg font-bold text-gray-700">Personal Information</CardTitle>
+                <CardTitle className="text-lg font-medium text-gray-700">Personal Information</CardTitle>
               </CardHeader>
               <CardContent className="p-6 pt-0">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-y-6 gap-x-12">
@@ -120,7 +120,7 @@ export default function ClientDetailsPage() {
           >
             <Card className="border-none shadow-sm">
               <CardHeader className="pb-4">
-                <CardTitle className="text-lg font-bold text-gray-700">Account Access</CardTitle>
+                <CardTitle className="text-lg font-medium text-gray-700">Account Access</CardTitle>
               </CardHeader>
               <CardContent className="p-6 pt-0">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-y-6 gap-x-12">
@@ -139,7 +139,7 @@ export default function ClientDetailsPage() {
           >
             <Card className="border-none shadow-sm overflow-hidden">
               <CardHeader className="pb-4">
-                <CardTitle className="text-lg font-bold text-gray-700">Appointment History</CardTitle>
+                <CardTitle className="text-lg font-medium text-gray-700">Appointment History</CardTitle>
               </CardHeader>
               <CardContent className="p-0">
                 <Table>
@@ -158,7 +158,7 @@ export default function ClientDetailsPage() {
                         <TableCell className="py-5 px-8 text-center">
                           <Badge
                             className={cn(
-                              "px-4 py-1.5 rounded-full font-bold text-[10px] border-none shadow-none",
+                              "px-4 py-1.5 rounded-full font-medium text-[10px] border-none shadow-none",
                               apt.status === "UPCOMING"
                                 ? "bg-[#E9F7F7] text-[#6BB9BA] hover:bg-[#E9F7F7]"
                                 : "bg-[#F3F4F6] text-gray-400 hover:bg-[#F3F4F6]"
@@ -186,7 +186,7 @@ export default function ClientDetailsPage() {
           >
             <Card className="border-none shadow-sm">
               <CardHeader className="pb-4">
-                <CardTitle className="text-lg font-bold text-gray-700">Recent Invoices</CardTitle>
+                <CardTitle className="text-lg font-medium text-gray-700">Recent Invoices</CardTitle>
               </CardHeader>
               <CardContent className="p-6 pt-0 space-y-6">
                 {clientData.invoices.map((invoice, index) => (
@@ -194,7 +194,7 @@ export default function ClientDetailsPage() {
                     <span className="text-sm font-medium text-gray-500 group-hover:text-gray-700 transition-colors">
                       Invoice {invoice.id}
                     </span>
-                    <span className="text-sm font-bold text-gray-800">
+                    <span className="text-sm font-medium text-gray-800">
                       {invoice.amount}
                     </span>
                   </div>
@@ -210,7 +210,7 @@ export default function ClientDetailsPage() {
             transition={{ delay: 0.6 }}
           >
             <Button
-              className="w-full h-14 bg-[#FF5858] hover:bg-[#ff4545] text-white rounded-xl font-bold text-base shadow-lg shadow-red-100 transition-all active:scale-[0.98]"
+              className="w-full h-14 bg-[#FF5858] hover:bg-[#ff4545] text-white rounded-xl font-medium text-base shadow-lg shadow-red-100 transition-all active:scale-[0.98]"
             >
               Block User Profile
             </Button>
