@@ -42,9 +42,10 @@ export default function ForgotPassword() {
         setIsSent(true);
         toast.success(res.message);
       }
-    } catch (error: any) {
-      console.error("Reset error:", error?.message);
-      toast.error(error?.message);
+    } catch (error: unknown) {
+      const err = error as { message?: string };
+      console.error("Reset error:", err?.message);
+      toast.error(err?.message || "Something went wrong");
     }
 
   };

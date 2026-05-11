@@ -33,10 +33,16 @@ import toast from "react-hot-toast";
 import Image from "next/image";
 import { baseURL } from "@/utils/BaseURL";
 
+interface Banner {
+  _id: string;
+  name: string;
+  images: string;
+}
+
 export default function BannersPage() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
-  const [editingBanner, setEditingBanner] = useState<any>(null);
+  const [editingBanner, setEditingBanner] = useState<Banner | null>(null);
   const [selectedBannerId, setSelectedBannerId] = useState<string | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -71,7 +77,7 @@ export default function BannersPage() {
     setEditingBanner(null);
   };
 
-  const handleEdit = (banner: any) => {
+  const handleEdit = (banner: Banner) => {
     setEditingBanner(banner);
     setFormData({ name: banner.name, imageFile: null });
     setImagePreview(banner.images);
@@ -104,8 +110,9 @@ export default function BannersPage() {
       }
       setIsModalOpen(false);
       resetForm();
-    } catch (error: any) {
-      toast.error(error?.data?.message || "Something went wrong");
+    } catch (error: unknown) {
+      const err = error as { data?: { message?: string } };
+      toast.error(err.data?.message || "Something went wrong");
     }
   };
 
@@ -116,8 +123,9 @@ export default function BannersPage() {
       toast.success("Banner deleted successfully");
       setIsDeleteModalOpen(false);
       setSelectedBannerId(null);
-    } catch (error: any) {
-      toast.error(error?.data?.message || "Failed to delete banner");
+    } catch (error: unknown) {
+      const err = error as { data?: { message?: string } };
+      toast.error(err.data?.message || "Failed to delete banner");
     }
   };
 
@@ -236,7 +244,7 @@ export default function BannersPage() {
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {banners.map((banner: any) => (
+          {banners.map((banner: Banner) => (
             <div key={banner._id} className="group bg-white rounded-2xl border border-gray-100 overflow-hidden shadow-sm hover:shadow-xl transition-all hover:-translate-y-2">
               <div className="relative h-[220px] w-full overflow-hidden">
                 <Image

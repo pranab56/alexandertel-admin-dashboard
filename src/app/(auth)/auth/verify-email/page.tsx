@@ -6,10 +6,10 @@ import { cn } from "@/lib/utils";
 import { ArrowLeft, ArrowRight } from "lucide-react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
-import { FormEvent, useEffect, useRef, useState } from "react";
+import { FormEvent, Suspense, useEffect, useRef, useState } from "react";
 import toast from "react-hot-toast";
 
-export default function VerifyEmail() {
+function VerifyEmailContent() {
   const [otp, setOtp] = useState<string[]>(new Array(6).fill(""));
   const [activeInput, setActiveInput] = useState(0);
   const [timer, setTimer] = useState(59);
@@ -61,9 +61,10 @@ export default function VerifyEmail() {
         toast.success(res.message);
         router.push(`/auth/reset-password?token=${res.data}`)
       }
-    } catch (error: any) {
-      console.error("Verification error:", error?.message);
-      toast.error(error?.message);
+    } catch (error: unknown) {
+      const err = error as { message?: string };
+      console.error("Verification error:", err?.message);
+      toast.error(err?.message || "Verification failed");
     }
   };
 
@@ -129,7 +130,7 @@ export default function VerifyEmail() {
             <p className="text-[#64748B] text-base mb-2 text-base font-medium">Didn&apos;t receive the code?</p>
             <button
               onClick={handleResend}
-              disabled={timer > 0}
+              disabled={timer > 0 || isResendLoading}
               className={cn(
                 "text-lg font-medium transition-colors text-base",
                 timer > 0 ? "text-[#94A3B8] cursor-not-allowed" : "text-[#1D68D5] hover:underline cursor-pointer"
@@ -147,5 +148,17 @@ export default function VerifyEmail() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function VerifyEmail() {
+  return (
+    <Suspense fallback={
+       <div className="min-h-screen flex items-center justify-center bg-[#EEF2F9]">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-[#1D68D5]"></div>
+      </div>
+    }>
+      <VerifyEmailContent />
+    </Suspense>
   );
 }

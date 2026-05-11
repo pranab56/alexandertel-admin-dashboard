@@ -153,9 +153,10 @@ export default function ProfilePage() {
       }
 
       toast.success("Profile updated successfully!", { id: toastId });
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.log(error);
-      toast.error(error?.data?.message || "Failed to update profile. Please try again.", { id: toastId });
+      const err = error as { data?: { message?: string } };
+      toast.error(err.data?.message || "Failed to update profile. Please try again.", { id: toastId });
     }
   };
 

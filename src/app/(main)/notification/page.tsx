@@ -12,9 +12,17 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { cn } from "@/lib/utils";
-import { Bell, CheckCircle2, Info, Search, Trash2, Calendar } from "lucide-react";
+import { Bell, Info, Calendar } from "lucide-react";
 import { useState } from "react";
 import { useAllNotificationQuery } from "@/features/notification/notificationApi";
+
+interface Notification {
+  _id: string;
+  text: string;
+  type: string;
+  createdAt: string;
+  read: boolean;
+}
 
 export default function NotificationPage() {
   const [page, setPage] = useState(1);
@@ -87,7 +95,7 @@ export default function NotificationPage() {
                     </TableRow>
                   ))
                 ) : notifications.length > 0 ? (
-                  notifications.map((notification: any) => (
+                  notifications.map((notification: Notification) => (
                     <TableRow
                       key={notification._id}
                       className={cn(

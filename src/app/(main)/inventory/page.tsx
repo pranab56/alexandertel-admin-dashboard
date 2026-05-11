@@ -41,13 +41,25 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { cn } from "@/lib/utils";
-import { AlertTriangle, Check, ChevronsUpDown, CreditCard, Search, Wallet } from "lucide-react";
+import { Check, ChevronsUpDown, CreditCard, Search } from "lucide-react";
 import { useState } from "react";
 import { useGetAllProductQuery } from "@/features/product/productApi";
 import { useCreateInventoryMutation, useAddStockMutation, useGetInventoryQuery } from "@/features/inventory/inventoryApi";
 import toast from "react-hot-toast";
 
 type InventoryStatus = "In Stock" | "Low Stock" | "Out of Stock";
+
+interface InventoryItem {
+  _id: string;
+  product: {
+    _id: string;
+    name: string;
+    catagory?: string;
+    sku?: string;
+  };
+  quantity: number;
+  lowStockAlert?: number;
+}
 
 export default function Inventory() {
   const [page, setPage] = useState(1);
@@ -62,7 +74,7 @@ export default function Inventory() {
   const [bulkQuantity, setBulkQuantity] = useState("");
   const [reserved, setReserved] = useState("0");
 
-  const [editProduct, setEditProduct] = useState<any>(null);
+  const [editProduct, setEditProduct] = useState<InventoryItem | null>(null);
   const [editQuantity, setEditQuantity] = useState("");
 
   const products = Array.isArray(productsResponse?.data) ? productsResponse?.data : productsResponse?.data?.data || [];
@@ -88,8 +100,9 @@ export default function Inventory() {
       setBulkProduct("");
       setBulkQuantity("");
       setReserved("0");
-    } catch (error: any) {
-      toast.error(error?.data?.message || "Failed to create inventory");
+    } catch (error: unknown) {
+      const err = error as { data?: { message?: string } };
+      toast.error(err.data?.message || "Failed to create inventory");
     }
   };
 
@@ -108,8 +121,9 @@ export default function Inventory() {
       setIsUpdateModalOpen(false);
       setEditProduct(null);
       setEditQuantity("");
-    } catch (error: any) {
-      toast.error(error?.data?.message || "Failed to update stock");
+    } catch (error: unknown) {
+      const err = error as { data?: { message?: string } };
+      toast.error(err.data?.message || "Failed to update stock");
     }
   };
 
@@ -158,7 +172,7 @@ export default function Inventory() {
                       className="w-full justify-between bg-[#F8F9FC] border-none rounded-sm h-12 text-gray-600 hover:bg-[#F8F9FC]/80"
                     >
                       {bulkProduct
-                        ? products.find((product: any) => product._id === bulkProduct)?.name
+                        ? products.find((product: { _id: string; name: string }) => product._id === bulkProduct)?.name
                         : "Select product..."}
                       <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                     </Button>
@@ -169,7 +183,7 @@ export default function Inventory() {
                       <CommandList>
                         <CommandEmpty>No product found.</CommandEmpty>
                         <CommandGroup>
-                          {products.map((product: any) => (
+                          {products.map((product: { _id: string; name: string }) => (
                             <CommandItem
                               key={product._id}
                               value={product._id}
@@ -285,7 +299,7 @@ export default function Inventory() {
                   No inventory items found.
                 </TableCell>
               </TableRow>
-            ) : inventoryItems.map((item: any, idx: number) => (
+            ) : inventoryItems.map((item: InventoryItem, idx: number) => (
               <TableRow key={idx} className="hover:bg-gray-50/50 border-gray-50">
                 <TableCell className="py-5 px-8 flex items-center gap-5">
                   <div className="w-12 h-12 bg-[#F2F0FF] rounded-xl flex items-center justify-center shrink-0">

@@ -9,12 +9,10 @@ import {
   CreditCard,
   Truck,
   Calendar,
-  Hash,
   Mail,
   ShieldCheck,
   Package,
   Clock,
-  Printer
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";

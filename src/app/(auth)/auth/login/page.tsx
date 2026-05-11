@@ -50,8 +50,9 @@ export default function LoginPage() {
       toast.success(res.message);
       await setAuthCookie(res.data.accessToken);
       router.push('/');
-    } catch (error: any) {
-      toast.error(error.data.message);
+    } catch (error: unknown) {
+      const err = error as { data?: { message?: string } };
+      toast.error(err.data?.message || "Login failed");
     }
   };
   

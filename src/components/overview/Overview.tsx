@@ -1,17 +1,8 @@
 "use client";
 
-import { Calendar } from "@/components/ui/calendar";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
 import { cn } from "@/lib/utils";
-import { format } from "date-fns";
 import {
-  Calendar as CalendarIcon,
   ClipboardList,
-  Package,
   ShoppingBag,
   Wallet,
   TrendingUp,
@@ -36,7 +27,7 @@ export default function Overview() {
   const { data: salesResponse, isLoading: isSalesLoading } = useOverviewSalesQuery({ type: viewType });
 
   const stats = analyticsResponse?.data || { totalOrders: 0, totalSales: 0, totalActiveRepair: 0 };
-  const chartData = (salesResponse?.data || []).map((item: any) => ({
+  const chartData = (salesResponse?.data || []).map((item: { label: string; totalSales: number; totalOrders: number }) => ({
     name: item.label,
     value: item.totalSales,
     orders: item.totalOrders
@@ -48,7 +39,13 @@ export default function Overview() {
     { label: "Active Repairs", value: stats.totalActiveRepair.toString(), icon: ClipboardList, color: "bg-amber-50 text-amber-500" },
   ];
 
-  const CustomTooltip = ({ active, payload, label }: any) => {
+  interface TooltipProps {
+    active?: boolean;
+    payload?: Array<{ value: number; payload: { orders: number } }>;
+    label?: string;
+  }
+
+  const CustomTooltip = ({ active, payload, label }: TooltipProps) => {
     if (active && payload && payload.length) {
       return (
         <div className="bg-white p-4 rounded-xl shadow-xl border border-gray-100">

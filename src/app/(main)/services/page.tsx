@@ -1,8 +1,7 @@
 "use client";
 
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import {
     Dialog,
     DialogContent,
@@ -24,11 +23,17 @@ import {
     TableHeader,
     TableRow,
 } from "@/components/ui/table";
-import { cn } from "@/lib/utils";
 import { Plus, Search, Trash2, Wrench, AlertCircle } from "lucide-react";
 import { useState } from "react";
 import { useGetAllServicesQuery, useCreateServicesMutation, useDeleteServicesMutation } from "@/features/services/servicesApi";
 import toast from "react-hot-toast";
+
+interface Service {
+  _id: string;
+  name: string;
+  description?: string;
+  price: number;
+}
 
 export default function ServicesPage() {
     const [searchTerm, setSearchTerm] = useState("");
@@ -65,8 +70,9 @@ export default function ServicesPage() {
             toast.success("Service created successfully");
             setIsCreateModalOpen(false);
             setFormData({ name: "", description: "", price: "" });
-        } catch (error: any) {
-            toast.error(error?.data?.message || "Failed to create service");
+        } catch (error: unknown) {
+            const err = error as { data?: { message?: string } };
+            toast.error(err.data?.message || "Failed to create service");
         }
     };
 
@@ -78,12 +84,13 @@ export default function ServicesPage() {
             toast.success("Service deleted successfully");
             setIsDeleteModalOpen(false);
             setSelectedServiceId(null);
-        } catch (error: any) {
-            toast.error(error?.data?.message || "Failed to delete service");
+        } catch (error: unknown) {
+            const err = error as { data?: { message?: string } };
+            toast.error(err.data?.message || "Failed to delete service");
         }
     };
 
-    const filteredServices = services.filter((service: any) =>
+    const filteredServices = services.filter((service: Service) =>
         service.name.toLowerCase().includes(searchTerm.toLowerCase())
     );
 
@@ -206,7 +213,7 @@ export default function ServicesPage() {
                                         </div>
                                     </TableCell>
                                 </TableRow>
-                            ) : filteredServices.map((service: any) => (
+                            ) : filteredServices.map((service: Service) => (
                                 <TableRow key={service._id} className="hover:bg-gray-50/50 border-gray-50 group transition-colors">
                                     <TableCell className="py-6 px-8">
                                         <span className="font-medium text-gray-900">{service.name}</span>

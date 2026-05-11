@@ -23,8 +23,9 @@ export default function PrivacyPolicy() {
       if (res.success) {
         toast.success(res.message || "Privacy policy saved successfully");
       }
-    } catch (error: any) {
-      toast.error(error?.data?.message || error?.message || "Failed to save privacy policy");
+    } catch (error: unknown) {
+      const err = error as { data?: { message?: string }; message?: string };
+      toast.error(err.data?.message || err.message || "Failed to save privacy policy");
       console.error("Save error:", error);
     }
   };

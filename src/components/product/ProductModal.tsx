@@ -21,19 +21,27 @@ import { Textarea } from "@/components/ui/textarea";
 import { CloudUpload, Plus, Trash2 } from "lucide-react";
 import { useRef } from "react";
 import Image from "next/image";
+import { useGetAllCategoryQuery } from "@/features/category/category";
+import { SketchPicker } from "react-color";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import { ProductOption, ProductFormData } from "./types";
 
 interface ProductModalProps {
   isOpen: boolean;
   onOpenChange: (open: boolean) => void;
   editingId: string | null;
-  formData: any;
-  setFormData: (data: any) => void;
-  storage: any[];
-  setStorage: (data: any) => void;
-  ram: any[];
-  setRam: (data: any) => void;
-  colors: any[];
-  setColors: (data: any) => void;
+  formData: ProductFormData;
+  setFormData: React.Dispatch<React.SetStateAction<ProductFormData>>;
+  storage: ProductOption[];
+  setStorage: React.Dispatch<React.SetStateAction<ProductOption[]>>;
+  ram: ProductOption[];
+  setRam: React.Dispatch<React.SetStateAction<ProductOption[]>>;
+  colors: ProductOption[];
+  setColors: React.Dispatch<React.SetStateAction<ProductOption[]>>;
   imagePreview: string | null;
   onImageChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   onSubmit: () => Promise<void>;
@@ -58,18 +66,19 @@ export default function ProductModal({
   isSaving,
 }: ProductModalProps) {
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const { data: categories } = useGetAllCategoryQuery(undefined);
 
-  const addArrayItem = (setter: any) => {
-    setter((prev: any) => [...prev, { type: "", price: 0 }]);
+  const addArrayItem = (setter: React.Dispatch<React.SetStateAction<ProductOption[]>>) => {
+    setter((prev) => [...prev, { type: "", price: "" }]);
   };
 
-  const removeArrayItem = (setter: any, index: number) => {
-    setter((prev: any) => prev.filter((_: any, i: number) => i !== index));
+  const removeArrayItem = (setter: React.Dispatch<React.SetStateAction<ProductOption[]>>, index: number) => {
+    setter((prev) => prev.filter((_, i) => i !== index));
   };
 
-  const updateArrayItem = (setter: any, index: number, field: string, value: any) => {
-    setter((prev: any) => prev.map((item: any, i: number) =>
-      i === index ? { ...item, [field]: field === 'price' ? Number(value) : value } : item
+  const updateArrayItem = (setter: React.Dispatch<React.SetStateAction<ProductOption[]>>, index: number, field: keyof ProductOption, value: string | number) => {
+    setter((prev) => prev.map((item, i) =>
+      i === index ? { ...item, [field]: field === 'price' ? (isNaN(Number(value)) ? value : Number(value)) : value } : item
     ));
   };
 
@@ -103,10 +112,11 @@ export default function ProductModal({
                   <SelectValue placeholder="Select Category" />
                 </SelectTrigger>
                 <SelectContent className="rounded-sm border-gray-100">
-                  <SelectItem value="mobile">Mobile</SelectItem>
-                  <SelectItem value="laptop">Laptop</SelectItem>
-                  <SelectItem value="sim">SIM Card</SelectItem>
-                  <SelectItem value="accessory">Accessory</SelectItem>
+                  {categories?.data?.map((cat: { _id: string; name: string }) => (
+                    <SelectItem key={cat._id} value={cat._id}>
+                      {cat.name}
+                    </SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
             </div>
@@ -151,8 +161,8 @@ export default function ProductModal({
               <label className="text-[14px] font-medium text-gray-700">Display</label>
               <Input
                 placeholder="e.g. 6.7 inch OLED"
-                value={formData.dispalyy}
-                onChange={(e) => setFormData({ ...formData, dispalyy: e.target.value })}
+                value={formData.display}
+                onChange={(e) => setFormData({ ...formData, display: e.target.value })}
                 className="w-full bg-[#F8F9FC] border-none rounded-sm h-12 mt-1 text-gray-600"
               />
             </div>
@@ -264,23 +274,34 @@ export default function ProductModal({
             <div className="space-y-4">
               <div className="flex items-center justify-between">
                 <label className="text-[14px] font-medium text-gray-900 uppercase tracking-tighter">Color Options</label>
-                <Button type="button" variant="ghost" size="sm" onClick={() => addArrayItem(setColors)} className="text-primary font-medium">
+                <Button type="button" variant="ghost" size="sm" onClick={() => addArrayItem(setColors)} className="text-primary font-medium ">
                   <Plus className="w-4 h-4 mr-1" /> Add Color
                 </Button>
               </div>
               {colors.map((item, idx) => (
                 <div key={idx} className="flex gap-4 items-center animate-in fade-in slide-in-from-top-1">
-                  <div className="flex-1 relative">
-                    <Input
+                  <div className="flex-1 relative flex items-center gap-2">
+                    <Popover>
+                      <PopoverTrigger asChild>
+                        <div
+                          className="w-20 h-11 rounded border border-gray-200 cursor-pointer shrink-0 shadow-sm"
+                          style={{ backgroundColor: item.type || '#000000' }}
+                        />
+                      </PopoverTrigger>
+                      <PopoverContent className="w-auto p-0 border-none bg-transparent shadow-none" align="start">
+                        <SketchPicker
+                          color={item.type || '#000000'}
+                          onChangeComplete={(color) => updateArrayItem(setColors, idx, 'type', color.hex)}
+                          disableAlpha={true}
+                        />
+                      </PopoverContent>
+                    </Popover>
+                    {/* <Input
                       placeholder="Hex Code (e.g. #000000)"
                       value={item.type}
                       onChange={(e) => updateArrayItem(setColors, idx, 'type', e.target.value)}
-                      className="bg-gray-50 border-none h-11 pl-12"
-                    />
-                    <div
-                      className="absolute left-3 top-1/2 -translate-y-1/2 w-6 h-6 rounded-full border border-gray-200"
-                      style={{ backgroundColor: item.type || '#ddd' }}
-                    />
+                      className="bg-gray-50 border-none h-11"
+                    /> */}
                   </div>
                   <Input
                     type="number"
@@ -335,7 +356,7 @@ export default function ProductModal({
           </div>
 
         </div>
-        <DialogFooter className="p-6 pt-4 pb-8 sm:justify-center gap-3 sticky bottom-0 bg-white border-t border-gray-50 z-10 shadow-[0_-10px_30px_-15px_rgba(0,0,0,0.1)]">
+        <DialogFooter className="p-6 pt-4 pb-8 sm:justify-center gap-3 sticky bottom-0 bg-white  border-t border-gray-50 z-10 shadow-[0_-10px_30px_-15px_rgba(0,0,0,0.1)]">
           <DialogClose asChild>
             <Button variant="outline" className="w-full sm:w-[150px] h-12 rounded-sm bg-[#F2F2F2] border-none font-medium text-gray-700 hover:bg-[#E5E5E5] transition-colors">
               Cancel

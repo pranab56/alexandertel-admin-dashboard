@@ -4,7 +4,7 @@ import { Eye, EyeOff } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { FormEvent, useState } from 'react';
+import { FormEvent, Suspense, useState } from 'react';
 import toast from 'react-hot-toast';
 import { useResetPasswordMutation } from '../../features/auth/authApi';
 
@@ -25,7 +25,7 @@ interface ResetPasswordData {
   token: string;
 }
 
-export default function ResetPasswordPage() {
+function ResetPasswordPageContent() {
   const [newPassword, setNewPassword] = useState<string>('');
   const [confirmPassword, setConfirmPassword] = useState<string>('');
   const [showNewPassword, setShowNewPassword] = useState<boolean>(false);
@@ -282,4 +282,16 @@ export default function ResetPasswordPage() {
       </div>
     </div>
   );
+}
+
+export default function ResetPasswordPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-[#8E4585]"></div>
+      </div>
+    }>
+      <ResetPasswordPageContent />
+    </Suspense>
+  )
 }

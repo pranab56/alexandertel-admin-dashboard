@@ -4,9 +4,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
-  DialogClose,
   DialogContent,
-  DialogFooter,
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
@@ -18,6 +16,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { cn } from "@/lib/utils";
 import { CreditCard, Eye, Gift, Mail, MapPin, Phone, Trash2 } from "lucide-react";
 import {
   useGetAllCustomersQuery,
@@ -28,13 +27,27 @@ import { useState } from "react";
 import Image from "next/image";
 import toast from "react-hot-toast";
 
+interface Customer {
+  _id: string;
+  userName: string;
+  email: string;
+  verified: boolean;
+  profile?: string;
+  loyaltyPoints: number;
+  phoneNumber?: string;
+  location?: string;
+  accountInformation?: {
+    status: boolean;
+  };
+}
+
 export default function Customers() {
   const [page, setPage] = useState(1);
   const { data: customersResponse, isLoading } = useGetAllCustomersQuery({ page, limit: 10 });
   const [deleteCustomer] = useDeleteCustomerMutation();
   const [updateStatus] = useUpdateStatusMutation();
 
-  const [selectedCustomer, setSelectedCustomer] = useState<any>(null);
+  const [selectedCustomer, setSelectedCustomer] = useState<Customer | null>(null);
   const [isDetailsOpen, setIsDetailsOpen] = useState(false);
 
   const customers = customersResponse?.data?.data || [];
@@ -44,8 +57,9 @@ export default function Customers() {
     try {
       await updateStatus(id).unwrap();
       toast.success("Status updated successfully");
-    } catch (error: any) {
-      toast.error(error?.data?.message || "Failed to update status");
+    } catch (error: unknown) {
+      const err = error as { data?: { message?: string } };
+      toast.error(err.data?.message || "Failed to update status");
     }
   };
 
@@ -54,8 +68,9 @@ export default function Customers() {
       try {
         await deleteCustomer(id).unwrap();
         toast.success("Customer deleted successfully");
-      } catch (error: any) {
-        toast.error(error?.data?.message || "Failed to delete customer");
+      } catch (error: unknown) {
+        const err = error as { data?: { message?: string } };
+        toast.error(err.data?.message || "Failed to delete customer");
       }
     }
   };
@@ -94,7 +109,7 @@ export default function Customers() {
                 </TableCell>
               </TableRow>
             ) : (
-              customers.map((customer: any) => (
+              customers.map((customer: Customer) => (
                 <TableRow key={customer._id} className="hover:bg-gray-50/50 border-gray-50 transition-colors">
                   <TableCell className="py-5 px-8 flex items-center gap-4">
                     <div className="w-12 h-12 bg-gray-50 border border-gray-100 rounded-full overflow-hidden relative shrink-0">
@@ -289,8 +304,4 @@ export default function Customers() {
       </Dialog>
     </div>
   );
-}
-
-function cn(...inputs: any[]) {
-  return inputs.filter(Boolean).join(" ");
 }

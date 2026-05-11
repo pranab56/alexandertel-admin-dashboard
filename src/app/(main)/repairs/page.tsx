@@ -33,6 +33,20 @@ import { useState } from "react";
 import { useGetAllRepairsQuery, useUpdateStatusMutation } from "@/features/repairs/repairsApi";
 import toast from "react-hot-toast";
 
+interface Repair {
+  _id: string;
+  user?: {
+    email: string;
+  };
+  product?: {
+    name: string;
+  };
+  address: string;
+  serviceType: string;
+  timeSlot: string;
+  status: string;
+}
+
 type RepairStatus = "pending" | "accepted" | "in-progress" | "completed" | "cancelled";
 
 export default function Repairs() {
@@ -41,7 +55,7 @@ export default function Repairs() {
   const [statusFilter, setStatusFilter] = useState("all");
 
   const { data: repairsResponse, isLoading } = useGetAllRepairsQuery({ page, limit: 10 });
-  const [updateStatus, { isLoading: isUpdating }] = useUpdateStatusMutation();
+  const [updateStatus] = useUpdateStatusMutation();
 
   const repairs = repairsResponse?.data || [];
   const meta = repairsResponse?.meta || { total: 0, limit: 10, page: 1, totalPage: 1 };
@@ -67,12 +81,13 @@ export default function Repairs() {
     try {
       await updateStatus({ id, data: { status: newStatus } }).unwrap();
       toast.success("Status updated successfully");
-    } catch (error: any) {
-      toast.error(error?.data?.message || "Failed to update status");
+    } catch (error: unknown) {
+      const err = error as { data?: { message?: string } };
+      toast.error(err.data?.message || "Failed to update status");
     }
   };
 
-  const filteredRepairs = repairs.filter((repair: any) => {
+  const filteredRepairs = repairs.filter((repair: Repair) => {
     const matchesSearch = repair.user?.email?.toLowerCase().includes(searchTerm.toLowerCase()) ||
       repair._id?.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesStatus = statusFilter === "all" || repair.status === statusFilter;
@@ -141,7 +156,7 @@ export default function Repairs() {
                   No repairs found.
                 </TableCell>
               </TableRow>
-            ) : filteredRepairs.map((repair: any) => (
+            ) : filteredRepairs.map((repair: Repair) => (
               <TableRow key={repair._id} className="hover:bg-gray-50/50 border-gray-50 transition-colors">
                 <TableCell className="py-5 px-8 font-medium text-gray-700">#{repair._id.slice(-6).toUpperCase()}</TableCell>
                 <TableCell className="py-5">

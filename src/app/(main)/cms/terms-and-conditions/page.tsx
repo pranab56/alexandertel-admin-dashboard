@@ -24,8 +24,9 @@ export default function TermsCondtions() {
       if (res.success) {
         toast.success(res.message || "Terms and Conditions saved successfully");
       }
-    } catch (error: any) {
-      toast.error(error?.data?.message || error?.message || "Failed to save terms and conditions");
+    } catch (error: unknown) {
+      const err = error as { data?: { message?: string }; message?: string };
+      toast.error(err.data?.message || err.message || "Failed to save terms and conditions");
       console.error("Save error:", error);
     }
   };

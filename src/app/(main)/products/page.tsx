@@ -1,9 +1,10 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   useGetAllProductQuery,
+  useGetSingleProductQuery,
   useCreateProductMutation,
   useUpdateProductMutation,
   useDeleteProductMutation
@@ -13,6 +14,7 @@ import { baseURL } from "@/utils/BaseURL";
 import ProductModal from "@/components/product/ProductModal";
 import ProductTable from "@/components/product/ProductTable";
 import ProductFilter from "@/components/product/ProductFilter";
+import { Product, ProductOption } from "@/components/product/types";
 
 const imageUrl = (path: string) => {
   if (!path) return "/placeholder-image.jpg";
@@ -23,13 +25,14 @@ const imageUrl = (path: string) => {
 export default function Products() {
   const [page, setPage] = useState(1);
   const { data: productsResponse, isLoading } = useGetAllProductQuery({ page, limit: 10 });
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const { data: singleProductResponse } = useGetSingleProductQuery(editingId, { skip: !editingId });
   const [createProduct, { isLoading: isCreating }] = useCreateProductMutation();
   const [updateProduct, { isLoading: isUpdating }] = useUpdateProductMutation();
   const [deleteProduct] = useDeleteProductMutation();
 
   const [searchTerm, setSearchTerm] = useState("");
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [editingId, setEditingId] = useState<string | null>(null);
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
 
@@ -40,39 +43,50 @@ export default function Products() {
     deviceType: "new",
     battery: "",
     basePrice: "",
-    dispalyy: "",
+    display: "",
     cheap: "",
     camera: "",
-    catagory: "mobile",
+    catagory: "",
     stock: "",
   });
 
-  const [storage, setStorage] = useState([{ type: "", price: 0 }]);
-  const [ram, setRam] = useState([{ type: "", price: 0 }]);
-  const [colors, setColors] = useState([{ type: "", price: 0 }]);
+  const [storage, setStorage] = useState<ProductOption[]>([{ type: "", price: "" }]);
+  const [ram, setRam] = useState<ProductOption[]>([{ type: "", price: "" }]);
+  const [colors, setColors] = useState<ProductOption[]>([{ type: "", price: "" }]);
 
-  const products = productsResponse?.data || [];
-  const meta = productsResponse?.meta || { total: 0, limit: 10, page: 1, totalPage: 1 };
-
-  const handleOpenModal = (product?: any) => {
-    if (product) {
-      setEditingId(product._id);
+  useEffect(() => {
+    if (editingId && singleProductResponse?.data) {
+      const product = singleProductResponse.data;
       setFormData({
         name: product.name || "",
         description: product.description || "",
         deviceType: product.deviceType || "new",
         battery: product.battery || "",
         basePrice: product.basePrice?.toString() || "",
-        dispalyy: product.dispalyy || "",
+        display: product.display || "",
         cheap: product.cheap || "",
         camera: product.camera || "",
-        catagory: product.catagory || "mobile",
+        catagory: product.catagory?._id || product.category?._id || "",
         stock: product.stock?.toString() || "",
       });
-      setStorage(product.storage?.length ? product.storage : [{ type: "", price: 0 }]);
-      setRam(product.ram?.length ? product.ram : [{ type: "", price: 0 }]);
-      setColors(product.colors?.length ? product.colors : [{ type: "", price: 0 }]);
-      setImagePreview(product.image ? imageUrl(product.image) : null);
+      setStorage(product.storage?.length ? product.storage : [{ type: "", price: "" }]);
+      setRam(product.ram?.length ? product.ram : [{ type: "", price: "" }]);
+      setColors(product.colors?.length ? product.colors : [{ type: "", price: "" }]);
+      setImagePreview(product.images?.[0] ? imageUrl(product.images[0]) : (product.image ? imageUrl(product.image) : null));
+    }
+  }, [singleProductResponse, editingId]);
+
+  const products = productsResponse?.data || [];
+  const meta = productsResponse?.meta || { total: 0, limit: 10, page: 1, totalPage: 1 };
+
+  const handleOpenModal = (product?: Product) => {
+    if (product) {
+      setEditingId(product._id);
+      setFormData((prev) => ({
+        ...prev,
+        name: product.name || "",
+        catagory: (typeof product.catagory === 'object' ? product.catagory?._id : product.catagory) || product.category?._id || "",
+      }));
     } else {
       setEditingId(null);
       setFormData({
@@ -81,15 +95,15 @@ export default function Products() {
         deviceType: "new",
         battery: "",
         basePrice: "",
-        dispalyy: "",
+        display: "",
         cheap: "",
         camera: "",
-        catagory: "mobile",
+        catagory: "",
         stock: "",
       });
-      setStorage([{ type: "", price: 0 }]);
-      setRam([{ type: "", price: 0 }]);
-      setColors([{ type: "", price: 0 }]);
+      setStorage([{ type: "", price: "" }]);
+      setRam([{ type: "", price: "" }]);
+      setColors([{ type: "", price: "" }]);
       setImagePreview(null);
     }
     setImageFile(null);
@@ -111,11 +125,11 @@ export default function Products() {
   const handleSubmit = async () => {
     const finalData = {
       ...formData,
-      basePrice: Number(formData.basePrice),
-      stock: Number(formData.stock),
-      storage: storage.filter(s => s.type),
-      ram: ram.filter(r => r.type),
-      colors: colors.filter(c => c.type),
+      basePrice: Number(formData.basePrice) || 0,
+      stock: Number(formData.stock) || 0,
+      storage: storage.filter(s => s.type).map(s => ({ ...s, price: Number(s.price) || 0 })),
+      ram: ram.filter(r => r.type).map(r => ({ ...r, price: Number(r.price) || 0 })),
+      colors: colors.filter(c => c.type).map(c => ({ ...c, price: Number(c.price) || 0 })),
     };
 
     const submitFormData = new FormData();
@@ -133,8 +147,9 @@ export default function Products() {
         toast.success("Product created successfully");
       }
       setIsModalOpen(false);
-    } catch (error: any) {
-      toast.error(error?.data?.message || "Something went wrong");
+    } catch (error: unknown) {
+      const err = error as { data?: { message?: string } };
+      toast.error(err.data?.message || "Something went wrong");
     }
   };
 
@@ -143,13 +158,14 @@ export default function Products() {
       try {
         await deleteProduct(id).unwrap();
         toast.success("Product deleted successfully");
-      } catch (error: any) {
-        toast.error(error?.data?.message || "Failed to delete");
+      } catch (error: unknown) {
+        const err = error as { data?: { message?: string } };
+        toast.error(err.data?.message || "Failed to delete");
       }
     }
   };
 
-  const filteredProducts = products.filter((p: any) =>
+  const filteredProducts = products.filter((p: Product) =>
     p.name?.toLowerCase().includes(searchTerm.toLowerCase())
   );
 

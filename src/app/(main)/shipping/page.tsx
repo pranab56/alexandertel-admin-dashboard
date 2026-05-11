@@ -2,7 +2,7 @@
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import {
   Dialog,
   DialogContent,
@@ -22,7 +22,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Switch } from "@/components/ui/switch";
 import {
   Table,
   TableBody,
@@ -36,6 +35,17 @@ import { Plus, Search, Trash2, Truck, AlertCircle, Info } from "lucide-react";
 import { useState } from "react";
 import { useGetAllShippingQuery, useCreateShippingMutation, useDeleteShippingMutation } from "@/features/shipping/shippingApi";
 import toast from "react-hot-toast";
+
+interface ShippingMethod {
+  _id: string;
+  name: string;
+  description?: string;
+  baseCost: number;
+  type: string;
+  perKmCost: number;
+  minOrderAmount: number;
+  isActive: boolean;
+}
 
 export default function ShippingPage() {
   const [searchTerm, setSearchTerm] = useState("");
@@ -85,8 +95,9 @@ export default function ShippingPage() {
         minOrderAmount: "",
         isActive: true,
       });
-    } catch (error: any) {
-      toast.error(error?.data?.message || "Failed to create shipping zone");
+    } catch (error: unknown) {
+      const err = error as { data?: { message?: string } };
+      toast.error(err.data?.message || "Failed to create shipping zone");
     }
   };
 
@@ -98,12 +109,13 @@ export default function ShippingPage() {
       toast.success("Shipping zone deleted successfully");
       setIsDeleteModalOpen(false);
       setSelectedShippingId(null);
-    } catch (error: any) {
-      toast.error(error?.data?.message || "Failed to delete shipping zone");
+    } catch (error: unknown) {
+      const err = error as { data?: { message?: string } };
+      toast.error(err.data?.message || "Failed to delete shipping zone");
     }
   };
 
-  const filteredMethods = shippingMethods.filter((method: any) =>
+  const filteredMethods = shippingMethods.filter((method: ShippingMethod) =>
     method.name.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
@@ -263,7 +275,7 @@ export default function ShippingPage() {
                     </div>
                   </TableCell>
                 </TableRow>
-              ) : filteredMethods.map((method: any) => (
+              ) : filteredMethods.map((method: ShippingMethod) => (
                 <TableRow key={method._id} className="hover:bg-gray-50/50 border-gray-50 group transition-colors">
                   <TableCell className="py-6 px-8">
                     <div className="flex flex-col">
@@ -316,7 +328,7 @@ export default function ShippingPage() {
         <Info className="w-6 h-6 text-primary shrink-0 mt-0.5" />
         <div className="space-y-1">
           <h4 className="text-sm font-medium text-gray-900">Logistics Policy Tip</h4>
-          <p className="text-sm text-gray-600 font-medium">Zones are processed in order of creation. For free shipping within specific areas, ensure the "Free Threshold" amount is set correctly to encourage larger customer orders.</p>
+          <p className="text-sm text-gray-600 font-medium">Zones are processed in order of creation. For free shipping within specific areas, ensure the &quot;Free Threshold&quot; amount is set correctly to encourage larger customer orders.</p>
         </div>
       </div>
 

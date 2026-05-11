@@ -24,6 +24,16 @@ import Link from "next/link";
 import { useState } from "react";
 import { useAllOrdersQuery } from "@/features/orders/ordersApi";
 
+interface Order {
+  _id: string;
+  orderId?: string;
+  date: string;
+  userName: string;
+  totalPrice: number;
+  PaymentMethod: string;
+  status: string;
+}
+
 export default function OrdersPage() {
   const [searchTerm, setSearchTerm] = useState("");
   const [page, setPage] = useState(1);
@@ -51,7 +61,7 @@ export default function OrdersPage() {
     }
   };
 
-  const filteredOrders = orders.filter((order: any) => {
+  const filteredOrders = orders.filter((order: Order) => {
     const matchesSearch = order.userName?.toLowerCase().includes(searchTerm.toLowerCase()) || 
                           order.orderId?.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesStatus = statusFilter === "all" || order.status.toLowerCase() === statusFilter.toLowerCase();
@@ -121,7 +131,7 @@ export default function OrdersPage() {
                   </div>
                 </TableCell>
               </TableRow>
-            ) : filteredOrders.map((order: any) => (
+            ) : filteredOrders.map((order: Order) => (
               <TableRow key={order._id} className="hover:bg-gray-50/50 border-gray-50 transition-colors group">
                 <TableCell className="py-6 px-8">
                   <div className="flex flex-col">

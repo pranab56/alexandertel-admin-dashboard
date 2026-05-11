@@ -89,8 +89,9 @@ export default function CouponPage() {
         discountValue: 0,
         expireAt: undefined,
       });
-    } catch (error: any) {
-      toast.error(error?.data?.message || "Failed to create coupon");
+    } catch (error: unknown) {
+      const err = error as { data?: { message?: string } };
+      toast.error(err.data?.message || "Failed to create coupon");
     }
   };
 
@@ -103,8 +104,9 @@ export default function CouponPage() {
       toast.success("Coupon deleted successfully", { id: toastId });
       setIsDeleteModalOpen(false);
       setCouponToDelete(null);
-    } catch (error: any) {
-      toast.error(error?.data?.message || "Failed to delete coupon", { id: toastId });
+    } catch (error: unknown) {
+      const err = error as { data?: { message?: string } };
+      toast.error(err.data?.message || "Failed to delete coupon", { id: toastId });
     }
   };
 

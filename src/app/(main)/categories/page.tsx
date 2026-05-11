@@ -5,9 +5,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Search, Plus, Edit, Trash2, X } from "lucide-react";
+import { Search, Plus, Edit, Trash2 } from "lucide-react";
 import { useState } from "react";
-import { cn } from "@/lib/utils";
 import {
     useGetAllCategoryQuery,
     useCreateCategoryMutation,
@@ -15,6 +14,11 @@ import {
     useDeleteCategoryMutation
 } from "@/features/category/category";
 import toast from "react-hot-toast";
+
+interface Category {
+    _id: string;
+    name: string;
+}
 
 export default function CategoriesPage() {
     const { data: categoriesResponse, isLoading } = useGetAllCategoryQuery(undefined);
@@ -27,13 +31,13 @@ export default function CategoriesPage() {
     const [editingId, setEditingId] = useState<string | null>(null);
     const [categoryName, setCategoryName] = useState("");
 
-    const categories = categoriesResponse?.data || [];
+    const categories: Category[] = categoriesResponse?.data || [];
 
-    const filteredCategories = categories.filter((category: any) =>
+    const filteredCategories = categories.filter((category) =>
         category.name.toLowerCase().includes(searchTerm.toLowerCase())
     );
 
-    const handleOpenModal = (category?: any) => {
+    const handleOpenModal = (category?: Category) => {
         if (category) {
             setEditingId(category._id);
             setCategoryName(category.name);
@@ -64,8 +68,9 @@ export default function CategoriesPage() {
             setIsModalOpen(false);
             setCategoryName("");
             setEditingId(null);
-        } catch (error: any) {
-            toast.error(error?.data?.message || "Failed to save category");
+        } catch (error: unknown) {
+            const err = error as { data?: { message?: string } };
+            toast.error(err.data?.message || "Failed to save category");
         }
     };
 
@@ -74,8 +79,9 @@ export default function CategoriesPage() {
             try {
                 await deleteCategory(id).unwrap();
                 toast.success("Category deleted successfully");
-            } catch (error: any) {
-                toast.error(error?.data?.message || "Failed to delete category");
+            } catch (error: unknown) {
+                const err = error as { data?: { message?: string } };
+                toast.error(err.data?.message || "Failed to delete category");
             }
         }
     };
@@ -135,7 +141,7 @@ export default function CategoriesPage() {
                                     </TableCell>
                                 </TableRow>
                             ) : (
-                                filteredCategories.map((category: any) => (
+                                filteredCategories.slice().reverse().map((category) => (
                                     <TableRow
                                         key={category._id}
                                         className="hover:bg-gray-50/50 border-gray-50 transition-colors"

@@ -8,10 +8,10 @@ import { cn } from "@/lib/utils";
 import { ArrowRight, Eye, EyeOff } from "lucide-react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
-import { FormEvent, useState } from "react";
+import { FormEvent, Suspense, useState } from "react";
 import toast from "react-hot-toast";
 
-export default function ResetPassword() {
+function ResetPasswordContent() {
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
@@ -58,9 +58,10 @@ export default function ResetPassword() {
         toast.success(res.message);
         setIsSuccess(true);
       }
-    } catch (error: any) {
-      console.error("Reset error:", error?.message);
-      toast.error(error?.message);
+    } catch (error: unknown) {
+      const err = error as { message?: string };
+      console.error("Reset error:", err?.message);
+      toast.error(err?.message || "Something went wrong");
     }
   };
 
@@ -181,5 +182,17 @@ export default function ResetPassword() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function ResetPassword() {
+  return (
+    <Suspense fallback={
+       <div className="min-h-screen flex items-center justify-center bg-[#EEF2F9]">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-[#1D68D5]"></div>
+      </div>
+    }>
+      <ResetPasswordContent />
+    </Suspense>
   );
 }

@@ -30,7 +30,6 @@ import {
   Truck,
   User,
   Users,
-  Wallet,
   Wrench
 } from "lucide-react";
 import Image from 'next/image';
@@ -57,7 +56,7 @@ const clientMenuItems: MenuItem[] = [
   { name: "Shipping", path: "/shipping", icon: Truck },
   { name: "Inventory", path: "/inventory", icon: RefreshCcw },
   { name: "Customers", path: "/customers", icon: Users },
-  { name: "Wallet & Payments", path: "/wallet", icon: Wallet },
+  // { name: "Wallet & Payments", path: "/wallet", icon: Wallet },
   { name: "Coupon", path: "/coupon", icon: Award },
   {
     name: "CMS",

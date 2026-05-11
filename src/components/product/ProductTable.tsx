@@ -14,6 +14,7 @@ import { cn } from "@/lib/utils";
 import { Edit, Trash2 } from "lucide-react";
 import Image from "next/image";
 import { baseURL } from "@/utils/BaseURL";
+import { Product } from "./types";
 
 const imageUrl = (path: string) => {
   if (!path) return "/placeholder-image.jpg";
@@ -22,9 +23,9 @@ const imageUrl = (path: string) => {
 };
 
 interface ProductTableProps {
-  products: any[];
+  products: Product[];
   isLoading: boolean;
-  onEdit: (product: any) => void;
+  onEdit: (product: Product) => void;
   onDelete: (id: string) => void;
   meta: {
     total: number;
@@ -76,11 +77,11 @@ export default function ProductTable({
             ))
           ) : products.length === 0 ? (
             <TableRow>
-              <TableCell colSpan={5} className="h-60 text-center text-gray-400 font-medium font-medium">
+              <TableCell colSpan={5} className="h-60 text-center text-gray-400 font-medium">
                 No products found.
               </TableCell>
             </TableRow>
-          ) : products.map((product: any) => (
+          ) : products.map((product: Product) => (
             <TableRow key={product._id} className="hover:bg-gray-50/50 border-gray-50 group">
               <TableCell className="py-5 px-8 flex items-center gap-5">
                 <div className="w-14 h-14 bg-gray-50 rounded-xl overflow-hidden relative shrink-0 border border-gray-100 shadow-sm transition-transform group-hover:scale-105">
@@ -96,10 +97,12 @@ export default function ProductTable({
                   <span className="text-gray-500 font-medium text-[13px] line-clamp-1 max-w-[200px]">{product.description}</span>
                 </div>
               </TableCell>
-              <TableCell className="py-5 font-semibold text-gray-700 capitalize">{product.catagory || "Mobile"}</TableCell>
+              <TableCell className="py-5 font-semibold text-gray-700 capitalize">
+                {typeof product.catagory === 'object' ? product.catagory?.name : (product.catagory || "Mobile")}
+              </TableCell>
               <TableCell className="py-5 font-semibold text-gray-700">€{product.basePrice}</TableCell>
               <TableCell className="py-5">
-                <Badge className={cn("px-4 py-1.5 rounded-full font-medium border-none shadow-none", getStatusStyles(product.stockStatus))}>
+                <Badge className={cn("px-4 py-1.5 rounded-full font-medium border-none shadow-none", getStatusStyles(product.stockStatus || "IN_STOCK"))}>
                   {product.stockStatus?.replace('_', ' ') || "IN STOCK"}
                 </Badge>
               </TableCell>
