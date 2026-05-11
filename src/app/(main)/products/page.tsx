@@ -3,6 +3,11 @@
 import { Button } from "@/components/ui/button";
 import { useState, useEffect } from "react";
 import {
+  Dialog,
+  DialogContent,
+} from "@/components/ui/dialog";
+import { AlertCircle } from "lucide-react";
+import {
   useGetAllProductQuery,
   useGetSingleProductQuery,
   useCreateProductMutation,
@@ -35,6 +40,9 @@ export default function Products() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [productIdToDelete, setProductIdToDelete] = useState<string | null>(null);
+  const [isDeletingProduct, setIsDeletingProduct] = useState(false);
 
   // Form State
   const [formData, setFormData] = useState({
@@ -153,15 +161,20 @@ export default function Products() {
     }
   };
 
-  const handleDelete = async (id: string) => {
-    if (confirm("Are you sure you want to delete this product?")) {
-      try {
-        await deleteProduct(id).unwrap();
-        toast.success("Product deleted successfully");
-      } catch (error: unknown) {
-        const err = error as { data?: { message?: string } };
-        toast.error(err.data?.message || "Failed to delete");
-      }
+  const handleDelete = async () => {
+    if (!productIdToDelete) return;
+
+    setIsDeletingProduct(true);
+    try {
+      await deleteProduct(productIdToDelete).unwrap();
+      toast.success("Product deleted successfully");
+      setIsDeleteModalOpen(false);
+      setProductIdToDelete(null);
+    } catch (error: unknown) {
+      const err = error as { data?: { message?: string } };
+      toast.error(err.data?.message || "Failed to delete product");
+    } finally {
+      setIsDeletingProduct(false);
     }
   };
 
@@ -195,7 +208,10 @@ export default function Products() {
         products={filteredProducts}
         isLoading={isLoading}
         onEdit={handleOpenModal}
-        onDelete={handleDelete}
+        onDelete={(id) => {
+          setProductIdToDelete(id);
+          setIsDeleteModalOpen(true);
+        }}
         meta={meta}
         onPageChange={setPage}
       />
@@ -217,6 +233,35 @@ export default function Products() {
         onSubmit={handleSubmit}
         isSaving={isCreating || isUpdating}
       />
+
+      {/* Delete Confirmation Modal */}
+      <Dialog open={isDeleteModalOpen} onOpenChange={setIsDeleteModalOpen}>
+        <DialogContent className="sm:max-w-[400px] p-0 rounded-xl border-none shadow-2xl overflow-hidden">
+          <div className="p-8 text-center bg-white">
+            <div className="w-20 h-20 bg-rose-50 rounded-full flex items-center justify-center mx-auto mb-6">
+              <AlertCircle className="w-10 h-10 text-rose-500" />
+            </div>
+            <h3 className="text-2xl font-medium text-gray-900 mb-2">Remove Product?</h3>
+            <p className="text-gray-500 font-medium">This will permanently delete the product from your catalog and all associated stock information.</p>
+          </div>
+          <div className="flex border-t border-gray-100">
+            <Button
+              variant="ghost"
+              onClick={() => setIsDeleteModalOpen(false)}
+              className="flex-1 h-16 rounded-none font-medium text-gray-500 hover:bg-gray-50 border-r border-gray-100"
+            >
+              Cancel
+            </Button>
+            <Button
+              onClick={handleDelete}
+              disabled={isDeletingProduct}
+              className="flex-1 h-16 bg-primary rounded-none font-medium text-white hover:text-white hover:bg-red-500 transition-colors"
+            >
+              {isDeletingProduct ? "Deleting..." : "Confirm Delete"}
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

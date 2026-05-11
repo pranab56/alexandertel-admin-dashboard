@@ -27,12 +27,13 @@ import { Plus, Search, Trash2, Wrench, AlertCircle } from "lucide-react";
 import { useState } from "react";
 import { useGetAllServicesQuery, useCreateServicesMutation, useDeleteServicesMutation } from "@/features/services/servicesApi";
 import toast from "react-hot-toast";
+import { Tooltip, TooltipContent, TooltipTrigger, TooltipProvider } from "@/components/ui/tooltip";
 
 interface Service {
-  _id: string;
-  name: string;
-  description?: string;
-  price: number;
+    _id: string;
+    name: string;
+    description?: string;
+    price: number;
 }
 
 export default function ServicesPage() {
@@ -199,8 +200,26 @@ export default function ServicesPage() {
                         <TableBody>
                             {isLoading ? (
                                 Array.from({ length: 3 }).map((_, i) => (
-                                    <TableRow key={i} className="animate-pulse">
-                                        <TableCell colSpan={5} className="h-20 bg-gray-50/50" />
+                                    <TableRow key={i} className="hover:bg-transparent border-gray-50">
+                                        <TableCell className="py-6 px-8">
+                                            <div className="flex flex-col gap-2">
+                                                <div className="h-5 w-24 bg-gray-100 rounded-lg animate-pulse" />
+                                            </div>
+                                        </TableCell>
+                                        <TableCell className="py-6">
+                                            <div className="h-5 w-32 bg-gray-100 rounded-lg animate-pulse" />
+                                        </TableCell>
+                                        <TableCell className="py-6">
+                                            <div className="flex flex-col gap-2">
+                                                <div className="h-6 w-20 bg-gray-100 rounded-lg animate-pulse" />
+                                            </div>
+                                        </TableCell>
+
+                                        <TableCell className="py-6 px-8 text-right">
+                                            <div className="flex justify-end">
+                                                <div className="h-10 w-10 bg-gray-100 rounded-xl animate-pulse" />
+                                            </div>
+                                        </TableCell>
                                     </TableRow>
                                 ))
                             ) : filteredServices.length === 0 ? (
@@ -213,15 +232,26 @@ export default function ServicesPage() {
                                         </div>
                                     </TableCell>
                                 </TableRow>
-                            ) : filteredServices.map((service: Service) => (
+                            ) : filteredServices.reverse().map((service: Service) => (
                                 <TableRow key={service._id} className="hover:bg-gray-50/50 border-gray-50 group transition-colors">
                                     <TableCell className="py-6 px-8">
                                         <span className="font-medium text-gray-900">{service.name}</span>
                                     </TableCell>
                                     <TableCell className="py-6">
-                                        <p className="text-gray-500 font-medium text-sm line-clamp-1 max-w-[300px]">
-                                            {service.description || "No description provided."}
-                                        </p>
+                                        <TooltipProvider>
+                                            <Tooltip>
+                                                <TooltipTrigger asChild>
+                                                    <p className="text-gray-500 font-medium text-sm cursor-help">
+                                                        {service.description && service.description.length > 25
+                                                            ? `${service.description.substring(0, 25)}...`
+                                                            : service.description || "No description provided."}
+                                                    </p>
+                                                </TooltipTrigger>
+                                                <TooltipContent className="bg-slate-900 text-white p-3 rounded-lg max-w-xs">
+                                                    <p>{service.description || "No description provided."}</p>
+                                                </TooltipContent>
+                                            </Tooltip>
+                                        </TooltipProvider>
                                     </TableCell>
                                     <TableCell className="py-6">
                                         <span className="font-medium text-gray-900 text-lg">€{service.price}</span>
@@ -267,7 +297,7 @@ export default function ServicesPage() {
                         <Button
                             onClick={handleDelete}
                             disabled={isDeleting}
-                            className="flex-1 h-16 rounded-none font-medium text-rose-500 hover:text-rose-600 hover:bg-rose-50 transition-colors"
+                            className="flex-1 h-16 bg-primary rounded-none font-medium text-white hover:text-white hover:bg-red-500 transition-colors"
                         >
                             {isDeleting ? "Deleting..." : "Confirm Delete"}
                         </Button>

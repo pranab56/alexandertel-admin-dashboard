@@ -39,9 +39,9 @@ export default function OrdersPage() {
   const [page, setPage] = useState(1);
   const [statusFilter, setStatusFilter] = useState("all");
 
-  const { data: orderResponse, isLoading } = useAllOrdersQuery({ 
-    page, 
-    limit: 10 
+  const { data: orderResponse, isLoading } = useAllOrdersQuery({
+    page,
+    limit: 10
   });
 
   const orders = orderResponse?.data || [];
@@ -62,8 +62,8 @@ export default function OrdersPage() {
   };
 
   const filteredOrders = orders.filter((order: Order) => {
-    const matchesSearch = order.userName?.toLowerCase().includes(searchTerm.toLowerCase()) || 
-                          order.orderId?.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesSearch = order.userName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      order.orderId?.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesStatus = statusFilter === "all" || order.status.toLowerCase() === statusFilter.toLowerCase();
     return matchesSearch && matchesStatus;
   });
@@ -107,7 +107,7 @@ export default function OrdersPage() {
         <Table>
           <TableHeader className="bg-[#F8F9FC]">
             <TableRow className="hover:bg-transparent border-gray-50">
-              <TableHead className="py-6 px-8 text-gray-900 font-medium text-[15px]">Order Info</TableHead>
+              <TableHead className="py-6 px-8 text-gray-900 font-medium text-[15px]">Order ID</TableHead>
               <TableHead className="py-6 text-gray-900 font-medium text-[15px]">Customer</TableHead>
               <TableHead className="py-6 text-gray-900 font-medium text-[15px]">Amount</TableHead>
               <TableHead className="py-6 text-gray-900 font-medium text-[15px]">Status</TableHead>
@@ -117,8 +117,30 @@ export default function OrdersPage() {
           <TableBody>
             {isLoading ? (
               Array.from({ length: 5 }).map((_, i) => (
-                <TableRow key={i} className="animate-pulse">
-                  <TableCell colSpan={5} className="h-20 bg-gray-50/50" />
+                <TableRow key={i} className="hover:bg-transparent border-gray-50">
+                  <TableCell className="py-6 px-8">
+                    <div className="flex flex-col gap-2">
+                      <div className="h-5 w-24 bg-gray-100 rounded-lg animate-pulse" />
+                      <div className="h-3 w-32 bg-gray-50 rounded-lg animate-pulse" />
+                    </div>
+                  </TableCell>
+                  <TableCell className="py-6">
+                    <div className="h-5 w-32 bg-gray-100 rounded-lg animate-pulse" />
+                  </TableCell>
+                  <TableCell className="py-6">
+                    <div className="flex flex-col gap-2">
+                      <div className="h-6 w-20 bg-gray-100 rounded-lg animate-pulse" />
+                      <div className="h-3 w-16 bg-gray-50 rounded-lg animate-pulse" />
+                    </div>
+                  </TableCell>
+                  <TableCell className="py-6">
+                    <div className="h-8 w-24 bg-gray-100 rounded-full animate-pulse" />
+                  </TableCell>
+                  <TableCell className="py-6 px-8 text-right">
+                    <div className="flex justify-end">
+                      <div className="h-10 w-10 bg-gray-100 rounded-xl animate-pulse" />
+                    </div>
+                  </TableCell>
                 </TableRow>
               ))
             ) : filteredOrders.length === 0 ? (
@@ -127,7 +149,7 @@ export default function OrdersPage() {
                   <div className="flex flex-col items-center justify-center text-gray-400 font-medium">
                     <CreditCard className="w-12 h-12 mb-4 opacity-20" />
                     <p>No transactions found.</p>
-                    <Button variant="link" onClick={() => {setSearchTerm(""); setStatusFilter("all")}} className="text-primary font-medium mt-2">Reset Filters</Button>
+                    <Button variant="link" onClick={() => { setSearchTerm(""); setStatusFilter("all") }} className="text-primary font-medium mt-2">Reset Filters</Button>
                   </div>
                 </TableCell>
               </TableRow>
@@ -172,8 +194,8 @@ export default function OrdersPage() {
         <div className="p-8 border-t border-gray-50 flex flex-col md:flex-row items-center justify-between gap-4 bg-white">
           <p className="text-gray-500 font-medium text-sm">Showing {filteredOrders.length} of {meta.total} Transactions</p>
           <div className="flex items-center gap-2">
-            <Button 
-              variant="ghost" 
+            <Button
+              variant="ghost"
               className="text-gray-400 font-medium hover:bg-transparent"
               onClick={() => setPage(Math.max(1, page - 1))}
               disabled={page === 1}
@@ -187,8 +209,8 @@ export default function OrdersPage() {
                   onClick={() => setPage(pageNum)}
                   className={cn(
                     "w-10 h-10 p-0 rounded-lg font-medium transition-all",
-                    page === pageNum 
-                      ? "bg-primary text-white hover:bg-primary/90 shadow-md" 
+                    page === pageNum
+                      ? "bg-primary text-white hover:bg-primary/90 shadow-md"
                       : "bg-white border border-gray-100 text-gray-600 hover:bg-gray-50"
                   )}
                 >
@@ -196,8 +218,8 @@ export default function OrdersPage() {
                 </Button>
               ))}
             </div>
-            <Button 
-              variant="ghost" 
+            <Button
+              variant="ghost"
               className="text-gray-400 font-medium hover:bg-transparent"
               onClick={() => setPage(Math.min(meta.totalPage, page + 1))}
               disabled={page === meta.totalPage}

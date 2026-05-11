@@ -289,8 +289,36 @@ export default function Inventory() {
           <TableBody>
             {isInventoryLoading ? (
               Array.from({ length: 5 }).map((_, i) => (
-                <TableRow key={i} className="animate-pulse">
-                  <TableCell colSpan={7} className="h-20 bg-gray-50/50" />
+                <TableRow key={i} className="hover:bg-transparent border-gray-50">
+                  <TableCell className="py-6 px-8">
+                    <div className="flex flex-col gap-2">
+                      <div className="h-5 w-24 bg-gray-100 rounded-lg animate-pulse" />
+                      <div className="h-3 w-32 bg-gray-50 rounded-lg animate-pulse" />
+                    </div>
+                  </TableCell>
+                  <TableCell className="py-6">
+                    <div className="h-5 w-32 bg-gray-100 rounded-lg animate-pulse" />
+                  </TableCell>
+                  <TableCell className="py-6">
+                    <div className="flex flex-col gap-2">
+                      <div className="h-6 w-20 bg-gray-100 rounded-lg animate-pulse" />
+                      <div className="h-3 w-16 bg-gray-50 rounded-lg animate-pulse" />
+                    </div>
+                  </TableCell>
+                  <TableCell className="py-6">
+                    <div className="h-8 w-24 bg-gray-100 rounded-full animate-pulse" />
+                  </TableCell>
+                  <TableCell className="py-6">
+                    <div className="h-8 w-24 bg-gray-100 rounded-full animate-pulse" />
+                  </TableCell>
+                  <TableCell className="py-6">
+                    <div className="h-8 w-24 bg-gray-100 rounded-full animate-pulse" />
+                  </TableCell>
+                  <TableCell className="py-6 px-8 text-right">
+                    <div className="flex justify-end">
+                      <div className="h-10 w-10 bg-gray-100 rounded-xl animate-pulse" />
+                    </div>
+                  </TableCell>
                 </TableRow>
               ))
             ) : inventoryItems.length === 0 ? (

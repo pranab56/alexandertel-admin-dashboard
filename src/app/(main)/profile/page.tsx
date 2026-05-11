@@ -174,11 +174,9 @@ export default function ProfilePage() {
       <Card className="border-none shadow-[0_2px_15px_-3px_rgba(0,0,0,0.07),0_10px_20px_-2px_rgba(0,0,0,0.04)] bg-white rounded-3xl overflow-hidden">
         <CardContent className="p-6 sm:p-8 flex flex-col sm:flex-row items-center gap-6 text-center sm:text-left">
           <div className="relative w-24 h-24 sm:w-28 sm:h-28 rounded-2xl overflow-hidden border border-gray-100 bg-[#EBF2FA] flex items-center justify-center shrink-0">
-            {imgPreview ? (
-              <Image src={imgPreview} fill alt="Profile Preview" className="object-cover" />
-            ) : (
-              <Image src={imageUrl("")} height={1000} width={1000} alt="Default Profile" className="h-full w-full object-cover" />
-            )}
+
+            <Image src={imgPreview || imageUrl("")} fill alt="Profile Preview" className="object-cover" />
+
           </div>
           <div className="space-y-4 sm:space-y-3 w-full">
             <div className="space-y-1">
@@ -200,17 +198,7 @@ export default function ProfilePage() {
               >
                 Update Photo
               </Button>
-              <Button
-                onClick={() => {
-                  setImgPreview(null);
-                  setImageFile(null);
-                  toast.success("Photo removed");
-                }}
-                variant="ghost"
-                className="text-[#1D68D5] hover:text-[#1A5BBF] hover:bg-transparent p-0 h-auto font-medium"
-              >
-                Remove
-              </Button>
+
             </div>
           </div>
         </CardContent>

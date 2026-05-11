@@ -138,12 +138,12 @@ export default function CouponPage() {
             </DialogHeader>
             <div className="p-6 space-y-6">
               <div className="space-y-3">
-                <label className="text-[15px] font-medium text-gray-800">Coupon Code</label>
+                <label className="text-[15px] font-medium text-gray-800 ">Coupon Code</label>
                 <Input
                   value={formData.code}
                   onChange={(e) => setFormData({ ...formData, code: e.target.value })}
                   placeholder="E.G., DISCOUNT10"
-                  className="w-full bg-[#F8F9FC] border-none rounded-xl h-14 text-gray-600 focus-visible:ring-1 focus-visible:ring-primary/20"
+                  className="w-full bg-[#F8F9FC] border-none rounded-xl h-14 mt-1 text-gray-600 focus-visible:ring-1 focus-visible:ring-primary/20"
                 />
               </div>
 
@@ -154,12 +154,12 @@ export default function CouponPage() {
                     value={formData.discountType}
                     onValueChange={(v) => setFormData({ ...formData, discountType: v })}
                   >
-                    <SelectTrigger className="w-full bg-[#F8F9FC] border-none rounded-xl py-6 h-14 text-gray-600 focus:ring-1 focus:ring-primary/20">
+                    <SelectTrigger className="w-full bg-[#F8F9FC] border-none  rounded-xl py-7 mt-1 h-14 text-gray-600 focus:ring-1 focus:ring-primary/20">
                       <SelectValue placeholder="Discount Type" />
                     </SelectTrigger>
                     <SelectContent className="rounded-xl border-gray-100">
                       <SelectItem value="percentage">Percentage</SelectItem>
-                      <SelectItem value="fixed">Fixed Amount</SelectItem>
+                      {/* <SelectItem value="fixed">Fixed Amount</SelectItem> */}
                     </SelectContent>
                   </Select>
                 </div>
@@ -170,7 +170,7 @@ export default function CouponPage() {
                     value={formData.discountValue}
                     onChange={(e) => setFormData({ ...formData, discountValue: Number(e.target.value) })}
                     placeholder="Value"
-                    className="w-full bg-[#F8F9FC] border-none rounded-xl h-14 text-gray-600 focus-visible:ring-1 focus-visible:ring-primary/20"
+                    className="w-full bg-[#F8F9FC] border-none rounded-xl h-14 mt-1 text-gray-600 focus-visible:ring-1 focus-visible:ring-primary/20"
                   />
                 </div>
               </div>
@@ -182,7 +182,7 @@ export default function CouponPage() {
                     <Button
                       variant={"outline"}
                       className={cn(
-                        "w-full bg-[#F8F9FC] border-none rounded-xl h-14 text-left font-normal flex items-center justify-between px-4 text-base hover:bg-[#F8F9FC]/80",
+                        "w-full bg-[#F8F9FC] border-none rounded-xl h-14 text-left mt-1 font-normal flex items-center justify-between px-4 text-base hover:bg-[#F8F9FC]/80",
                         !formData.expireAt && "text-gray-400"
                       )}
                     >
@@ -222,72 +222,100 @@ export default function CouponPage() {
 
       {/* Data Table */}
       <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
-        {isLoading ? (
-          <div className="p-8 text-center text-gray-500">Loading coupons...</div>
-        ) : (
-          <Table>
-            <TableHeader>
-              <TableRow className="hover:bg-transparent border-gray-50 bg-[#F8F9FC]">
-                <TableHead className="py-6 px-8 text-gray-900 font-medium h-14 text-[15px]">Coupon Code</TableHead>
-                <TableHead className="py-6 text-gray-900 font-medium h-14 text-[15px]">Discount Type</TableHead>
-                <TableHead className="py-6 text-gray-900 font-medium h-14 text-[15px]">Discount Value</TableHead>
-                <TableHead className="py-6 text-gray-900 font-medium h-14 text-[15px]">Status</TableHead>
-                <TableHead className="py-6 text-gray-900 font-medium h-14 text-[15px]">Expiry Date</TableHead>
-                <TableHead className="py-6 px-8 text-right text-gray-900 font-medium h-14 text-[15px]">Actions</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {coupons.length > 0 ? (
-                coupons.map((coupon) => (
-                  <TableRow key={coupon._id} className="hover:bg-gray-50/50 border-gray-50">
-                    <TableCell className="py-5 px-8">
-                      <div className="flex items-center gap-4">
-                        <div className="w-[42px] h-[42px] bg-[#F4F6F9] rounded-full flex items-center justify-center shrink-0">
-                          <span className="font-medium text-gray-700 text-[11px]">CODE</span>
-                        </div>
-                        <span className="font-medium text-gray-900 text-[15px]">{coupon.code}</span>
-                      </div>
-                    </TableCell>
-                    <TableCell className="py-5 font-medium text-gray-700 text-[15px] capitalize">
-                      {coupon.discountType}
-                    </TableCell>
-                    <TableCell className="py-5 font-medium text-gray-700 text-[15px]">
-                      {coupon.discountValue}
-                      {coupon.discountType === "percentage" ? "%" : ""}
-                    </TableCell>
-                    <TableCell className="py-5">
-                      <Badge className={cn("px-4 py-1.5 rounded-full font-medium border-none shadow-none text-[14px]", getStatusStyles(coupon.isActive))}>
-                        {coupon.isActive ? "Active" : "Inactive"}
-                      </Badge>
-                    </TableCell>
-                    <TableCell className="py-5 font-medium text-gray-700 text-[15px]">
-                      {format(new Date(coupon.expireAt), "MMM dd, yyyy")}
-                    </TableCell>
-                    <TableCell className="py-5 px-8 text-right">
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        onClick={() => {
-                          setCouponToDelete(coupon._id);
-                          setIsDeleteModalOpen(true);
-                        }}
-                        className="text-red-500 hover:text-red-600 hover:bg-red-50"
-                      >
-                        <Trash2 className="h-5 w-5" />
-                      </Button>
-                    </TableCell>
-                  </TableRow>
-                ))
-              ) : (
-                <TableRow>
-                  <TableCell colSpan={6} className="py-10 text-center text-gray-500 font-medium">
-                    No coupons found
+
+        <Table>
+          <TableHeader>
+            <TableRow className="hover:bg-transparent border-gray-50 bg-[#F8F9FC]">
+              <TableHead className="py-6 px-8 text-gray-900 font-medium h-14 text-[15px]">Coupon Code</TableHead>
+              <TableHead className="py-6 text-gray-900 font-medium h-14 text-[15px]">Discount Type</TableHead>
+              <TableHead className="py-6 text-gray-900 font-medium h-14 text-[15px]">Discount Value</TableHead>
+              <TableHead className="py-6 text-gray-900 font-medium h-14 text-[15px]">Status</TableHead>
+              <TableHead className="py-6 text-gray-900 font-medium h-14 text-[15px]">Expiry Date</TableHead>
+              <TableHead className="py-6 px-8 text-right text-gray-900 font-medium h-14 text-[15px]">Actions</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {isLoading ? (
+              Array.from({ length: 5 }).map((_, i) => (
+                <TableRow key={i} className="hover:bg-transparent border-gray-50">
+                  <TableCell className="py-6 px-8">
+                    <div className="flex flex-col gap-2">
+                      <div className="h-5 w-24 bg-gray-100 rounded-lg animate-pulse" />
+                      <div className="h-3 w-32 bg-gray-50 rounded-lg animate-pulse" />
+                    </div>
+                  </TableCell>
+                  <TableCell className="py-6">
+                    <div className="h-5 w-32 bg-gray-100 rounded-lg animate-pulse" />
+                  </TableCell>
+                  <TableCell className="py-6">
+                    <div className="flex flex-col gap-2">
+                      <div className="h-6 w-20 bg-gray-100 rounded-lg animate-pulse" />
+                      <div className="h-3 w-16 bg-gray-50 rounded-lg animate-pulse" />
+                    </div>
+                  </TableCell>
+                  <TableCell className="py-6">
+                    <div className="h-8 w-24 bg-gray-100 rounded-full animate-pulse" />
+                  </TableCell>
+                  <TableCell className="py-6">
+                    <div className="h-5 w-24 bg-gray-50 rounded-lg animate-pulse" />
+                  </TableCell>
+                  <TableCell className="py-6 px-8 text-right">
+                    <div className="flex justify-end">
+                      <div className="h-10 w-10 bg-gray-100 rounded-xl animate-pulse" />
+                    </div>
                   </TableCell>
                 </TableRow>
-              )}
-            </TableBody>
-          </Table>
-        )}
+              ))
+            ) : coupons.length > 0 ? (
+              coupons.map((coupon) => (
+                <TableRow key={coupon._id} className="hover:bg-gray-50/50 border-gray-50">
+                  <TableCell className="py-5 px-8">
+                    <div className="flex items-center gap-4">
+                      <div className="w-[42px] h-[42px] bg-[#F4F6F9] rounded flex items-center justify-center shrink-0">
+                        <span className="font-medium text-green-700 text-[11px]">CODE</span>
+                      </div>
+                      <span className="font-medium text-gray-900 text-[15px]">{coupon.code}</span>
+                    </div>
+                  </TableCell>
+                  <TableCell className="py-5 font-medium text-gray-700 text-[15px] capitalize">
+                    {coupon.discountType}
+                  </TableCell>
+                  <TableCell className="py-5 font-medium text-gray-700 text-[15px]">
+                    {coupon.discountValue}
+                    {coupon.discountType === "percentage" ? "%" : ""}
+                  </TableCell>
+                  <TableCell className="py-5">
+                    <Badge className={cn("px-4 py-1.5 rounded-full font-medium border-none shadow-none text-[14px]", getStatusStyles(coupon.isActive))}>
+                      {coupon.isActive ? "Active" : "Inactive"}
+                    </Badge>
+                  </TableCell>
+                  <TableCell className="py-5 font-medium text-gray-700 text-[15px]">
+                    {format(new Date(coupon.expireAt), "MMM dd, yyyy")}
+                  </TableCell>
+                  <TableCell className="py-5 px-8 text-right">
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => {
+                        setCouponToDelete(coupon._id);
+                        setIsDeleteModalOpen(true);
+                      }}
+                      className="text-red-500 hover:text-red-600 hover:bg-red-50"
+                    >
+                      <Trash2 className="h-5 w-5" />
+                    </Button>
+                  </TableCell>
+                </TableRow>
+              ))
+            ) : (
+              <TableRow>
+                <TableCell colSpan={6} className="py-10 text-center text-gray-500 font-medium">
+                  No coupons found
+                </TableCell>
+              </TableRow>
+            )}
+          </TableBody>
+        </Table>
 
         {/* Info Area */}
         {coupons.length > 0 && (

@@ -2,7 +2,8 @@
 
 import type { ReactNode } from 'react';
 import { Provider } from "react-redux";
-import { store } from "../utils/store";
+import { PersistGate } from "redux-persist/integration/react";
+import { store, persistor } from "../utils/store";
 
 interface ClientLayoutProps {
   children: ReactNode;
@@ -11,7 +12,9 @@ interface ClientLayoutProps {
 export default function ClientLayout({ children }: ClientLayoutProps) {
   return (
     <Provider store={store}>
-      {children}
+      <PersistGate loading={null} persistor={persistor}>
+        {children}
+      </PersistGate>
     </Provider>
   );
 }

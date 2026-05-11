@@ -177,7 +177,7 @@ export default function BannersPage() {
                   {imagePreview ? (
                     <div className="relative w-full h-full">
                       <Image
-                        src={imagePreview.startsWith('data:') ? imagePreview : `http://humayon5002.binarybards.online${imagePreview}`}
+                        src={imagePreview.startsWith('data:') ? imagePreview : `${baseURL}${imagePreview}`}
                         alt="Preview"
                         fill
                         className="object-cover"
@@ -303,7 +303,7 @@ export default function BannersPage() {
             <Button
               onClick={handleDelete}
               disabled={isDeleting}
-              className="flex-1 h-16 rounded-none font-medium text-rose-500 hover:text-rose-600 hover:bg-rose-50 transition-colors"
+              className="flex-1 h-16 rounded-none bg-primary font-medium text-white hover:text-white hover:bg-red-500 transition-colors"
             >
               {isDeleting ? <Loader2 className="w-5 h-5 animate-spin" /> : "Remove Banner"}
             </Button>

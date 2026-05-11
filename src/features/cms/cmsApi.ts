@@ -6,7 +6,7 @@ export const cmsApi = baseApi.injectEndpoints({
         // Privacy Policy
         createPrivacyPolicy: builder.mutation({
             query: (data) => ({
-                url: "/rule/privacy-policy",
+                url: "/privacy-policy",
                 method: "POST",
                 body: data,
             }),
@@ -14,7 +14,7 @@ export const cmsApi = baseApi.injectEndpoints({
 
         getPrivacyPolicy: builder.query({
             query: () => ({
-                url: "/rule/privacy-policy",
+                url: "/privacy-policy",
                 method: "GET",
             }),
         }),
@@ -22,7 +22,7 @@ export const cmsApi = baseApi.injectEndpoints({
         // Terms and Conditions
         createTermsAndConditions: builder.mutation({
             query: (data) => ({
-                url: "/rule/terms-and-conditions",
+                url: "/terms-and-conditions",
                 method: "POST",
                 body: data,
             }),
@@ -30,7 +30,7 @@ export const cmsApi = baseApi.injectEndpoints({
 
         getTermsAndConditions: builder.query({
             query: () => ({
-                url: "/rule/terms-and-conditions",
+                url: "/terms-and-conditions",
                 method: "GET",
             }),
         }),

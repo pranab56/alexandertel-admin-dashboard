@@ -17,7 +17,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { cn } from "@/lib/utils";
-import { CreditCard, Eye, Gift, Mail, MapPin, Phone, Trash2 } from "lucide-react";
+import { CreditCard, Eye, Gift, Mail, MapPin, Phone, Trash2, AlertCircle } from "lucide-react";
 import {
   useGetAllCustomersQuery,
   useDeleteCustomerMutation,
@@ -49,6 +49,9 @@ export default function Customers() {
 
   const [selectedCustomer, setSelectedCustomer] = useState<Customer | null>(null);
   const [isDetailsOpen, setIsDetailsOpen] = useState(false);
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [customerIdToDelete, setCustomerIdToDelete] = useState<string | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   const customers = customersResponse?.data?.data || [];
   const meta = customersResponse?.data?.meta || { total: 0, limit: 10, page: 1, totalPage: 1 };
@@ -63,15 +66,20 @@ export default function Customers() {
     }
   };
 
-  const handleDelete = async (id: string) => {
-    if (confirm("Are you sure you want to delete this customer?")) {
-      try {
-        await deleteCustomer(id).unwrap();
-        toast.success("Customer deleted successfully");
-      } catch (error: unknown) {
-        const err = error as { data?: { message?: string } };
-        toast.error(err.data?.message || "Failed to delete customer");
-      }
+  const handleDelete = async () => {
+    if (!customerIdToDelete) return;
+    
+    setIsDeleting(true);
+    try {
+      await deleteCustomer(customerIdToDelete).unwrap();
+      toast.success("Customer deleted successfully");
+      setIsDeleteModalOpen(false);
+      setCustomerIdToDelete(null);
+    } catch (error: unknown) {
+      const err = error as { data?: { message?: string } };
+      toast.error(err.data?.message || "Failed to delete customer");
+    } finally {
+      setIsDeleting(false);
     }
   };
 
@@ -98,8 +106,30 @@ export default function Customers() {
           <TableBody>
             {isLoading ? (
               Array.from({ length: 5 }).map((_, i) => (
-                <TableRow key={i} className="animate-pulse">
-                  <TableCell colSpan={5} className="h-20 bg-gray-50/50" />
+                <TableRow key={i} className="hover:bg-transparent border-gray-50">
+                  <TableCell className="py-6 px-8">
+                    <div className="flex flex-col gap-2">
+                      <div className="h-5 w-24 bg-gray-100 rounded-lg animate-pulse" />
+                      <div className="h-3 w-32 bg-gray-50 rounded-lg animate-pulse" />
+                    </div>
+                  </TableCell>
+                  <TableCell className="py-6">
+                    <div className="h-5 w-32 bg-gray-100 rounded-lg animate-pulse" />
+                  </TableCell>
+                  <TableCell className="py-6">
+                    <div className="flex flex-col gap-2">
+                      <div className="h-6 w-20 bg-gray-100 rounded-lg animate-pulse" />
+                      <div className="h-3 w-16 bg-gray-50 rounded-lg animate-pulse" />
+                    </div>
+                  </TableCell>
+                  <TableCell className="py-6">
+                    <div className="h-8 w-24 bg-gray-100 rounded-full animate-pulse" />
+                  </TableCell>
+                  <TableCell className="py-6 px-8 text-right">
+                    <div className="flex justify-end">
+                      <div className="h-10 w-10 bg-gray-100 rounded-xl animate-pulse" />
+                    </div>
+                  </TableCell>
                 </TableRow>
               ))
             ) : customers.length === 0 ? (
@@ -161,7 +191,10 @@ export default function Customers() {
                       <Button
                         variant="ghost"
                         size="icon"
-                        onClick={() => handleDelete(customer._id)}
+                        onClick={() => {
+                          setCustomerIdToDelete(customer._id);
+                          setIsDeleteModalOpen(true);
+                        }}
                         className="h-9 w-9 text-gray-400 hover:text-red-500 hover:bg-red-50 transition-colors"
                         title="Delete"
                       >
@@ -272,8 +305,8 @@ export default function Customers() {
                   </div>
                 </div>
                 <div className="flex items-center gap-4">
-                  <div className="w-10 h-10 bg-[#F2F2F2] rounded-xl flex items-center justify-center shrink-0 shadow-sm">
-                    <Badge className={cn("p-1 rounded-sm", selectedCustomer.verified ? "bg-green-100 text-green-700" : "bg-red-100 text-red-700")}>
+                  <div className="w-10 h-10 bg-[#F2F2F2] rounded-xl flex items-center justify-center shrink-0">
+                    <Badge className={cn("px-1 py-3 rounded-sm", selectedCustomer.verified ? "bg-green-100 text-green-700" : "bg-red-100 text-red-700")}>
                       {selectedCustomer.verified ? 'Verified' : 'Unverified'}
                     </Badge>
                   </div>
@@ -300,6 +333,35 @@ export default function Customers() {
 
             </div>
           )}
+        </DialogContent>
+      </Dialog>
+
+      {/* Delete Confirmation Modal */}
+      <Dialog open={isDeleteModalOpen} onOpenChange={setIsDeleteModalOpen}>
+        <DialogContent className="sm:max-w-[400px] p-0 rounded-xl border-none shadow-2xl overflow-hidden">
+          <div className="p-8 text-center bg-white">
+            <div className="w-20 h-20 bg-rose-50 rounded-full flex items-center justify-center mx-auto mb-6">
+              <AlertCircle className="w-10 h-10 text-rose-500" />
+            </div>
+            <h3 className="text-2xl font-medium text-gray-900 mb-2">Remove Customer?</h3>
+            <p className="text-gray-500 font-medium">This will permanently delete the customer account and all associated loyalty data data from the system.</p>
+          </div>
+          <div className="flex border-t border-gray-100">
+            <Button
+              variant="ghost"
+              onClick={() => setIsDeleteModalOpen(false)}
+              className="flex-1 h-16 rounded-none font-medium text-gray-500 hover:bg-gray-50 border-r border-gray-100"
+            >
+              Cancel
+            </Button>
+            <Button
+              onClick={handleDelete}
+              disabled={isDeleting}
+              className="flex-1 h-16 bg-primary rounded-none font-medium text-white hover:text-white hover:bg-red-500 transition-colors"
+            >
+              {isDeleting ? "Deleting..." : "Confirm Delete"}
+            </Button>
+          </div>
         </DialogContent>
       </Dialog>
     </div>

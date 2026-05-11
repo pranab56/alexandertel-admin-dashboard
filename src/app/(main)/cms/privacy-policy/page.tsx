@@ -50,18 +50,32 @@ export default function PrivacyPolicy() {
       </div>
 
       {/* Editor Content Area */}
-      <div className="bg-white rounded-[24px] shadow-sm border border-gray-100 overflow-hidden flex flex-col p-6">
-        <div className="w-full">
-          <TipTapEditor
-            content={content}
-            onChange={(html) => setContent(html)}
-            minHeight="500px"
-            placeholder="Start writing the privacy policy..."
-            showWordCount={true}
-            wordLimit={5000}
-            className="w-full"
-          />
-        </div>
+      <div className="bg-white rounded-[24px] shadow-sm border border-gray-100 overflow-hidden flex flex-col p-6 min-h-[600px]">
+        {getPrivacyPolicyLoading ? (
+          <div className="space-y-4 animate-pulse">
+            <div className="h-8 bg-gray-100 rounded-md w-3/4" />
+            <div className="h-4 bg-gray-50 rounded-md w-full" />
+            <div className="h-4 bg-gray-50 rounded-md w-full" />
+            <div className="h-4 bg-gray-50 rounded-md w-2/3" />
+            <div className="pt-8 space-y-4">
+              <div className="h-8 bg-gray-100 rounded-md w-1/2" />
+              <div className="h-4 bg-gray-50 rounded-md w-full" />
+              <div className="h-4 bg-gray-50 rounded-md w-5/6" />
+            </div>
+          </div>
+        ) : (
+          <div className="w-full">
+            <TipTapEditor
+              content={content}
+              onChange={(html) => setContent(html)}
+              minHeight="500px"
+              placeholder="Start writing the privacy policy..."
+              showWordCount={true}
+              wordLimit={5000}
+              className="w-full"
+            />
+          </div>
+        )}
       </div>
     </div>
   );

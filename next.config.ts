@@ -28,6 +28,11 @@ const nextConfig: NextConfig = {
         hostname: "humayon5002.binarybards.online",
         pathname: "/**",
       },
+       {
+        protocol: "https",
+        hostname: "hz2w208g-5006.inc1.devtunnels.ms",
+        pathname: "/**",
+      },
       {
         protocol: "http",
         hostname: "10.10.7.55",

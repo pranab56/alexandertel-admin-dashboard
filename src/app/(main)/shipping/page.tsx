@@ -148,7 +148,7 @@ export default function ShippingPage() {
                 <div className="space-y-3 md:col-span-2">
                   <Label className="text-sm font-medium text-gray-700 uppercase tracking-wider">Zone Name <span className="text-red-500">*</span></Label>
                   <Input
-                    placeholder="e.g., Inside Dhaka"
+                    placeholder="Zone Name"
                     className="bg-gray-50 border-none h-14 rounded-xl font-medium px-4 focus-visible:ring-1 focus-visible:ring-primary/20"
                     value={formData.name}
                     onChange={(e) => setFormData({ ...formData, name: e.target.value })}
@@ -168,7 +168,7 @@ export default function ShippingPage() {
                 <div className="space-y-3">
                   <Label className="text-sm font-medium text-gray-700 uppercase tracking-wider">Pricing Type</Label>
                   <Select value={formData.type} onValueChange={(val) => setFormData({ ...formData, type: val })}>
-                    <SelectTrigger className="bg-gray-50 border-none h-14 rounded-xl font-medium px-4 focus:ring-1 focus:ring-primary/20">
+                    <SelectTrigger className="bg-gray-50 border-none h-14 py-7 w-full rounded-xl font-medium px-4 focus:ring-1 focus:ring-primary/20">
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent className="rounded-xl border-gray-100 font-medium">
@@ -231,7 +231,7 @@ export default function ShippingPage() {
       </div>
 
       {/* Main Content Table */}
-      <Card className="border border-gray-100 shadow-sm rounded-xl overflow-hidden bg-white">
+      <Card className="border border-gray-100 shadow-sm rounded-xl overflow-hidden bg-white p-0">
         <CardHeader className="p-6 border-b border-gray-50 bg-[#F8F9FC]">
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
             <h2 className="text-lg font-medium text-gray-900">Configured Shipping Zones</h2>
@@ -261,8 +261,34 @@ export default function ShippingPage() {
             <TableBody>
               {isLoading ? (
                 Array.from({ length: 3 }).map((_, i) => (
-                  <TableRow key={i} className="animate-pulse">
-                    <TableCell colSpan={6} className="h-20 bg-gray-50/50" />
+                  <TableRow key={i} className="hover:bg-transparent border-gray-50">
+                    <TableCell className="py-6 px-8">
+                      <div className="flex flex-col gap-2">
+                        <div className="h-5 w-24 bg-gray-100 rounded-lg animate-pulse" />
+                        <div className="h-3 w-32 bg-gray-50 rounded-lg animate-pulse" />
+                      </div>
+                    </TableCell>
+                    <TableCell className="py-6">
+                      <div className="h-5 w-32 bg-gray-100 rounded-lg animate-pulse" />
+                      <div className="h-3 w-16 bg-gray-50 rounded-lg animate-pulse" />
+                    </TableCell>
+                    <TableCell className="py-6">
+                      <div className="flex flex-col gap-2">
+                        <div className="h-6 w-20 bg-gray-100 rounded-lg animate-pulse" />
+
+                      </div>
+                    </TableCell>
+                    <TableCell className="py-6">
+                      <div className="h-8 w-24 bg-gray-100 rounded-full animate-pulse" />
+                    </TableCell>
+                    <TableCell className="py-6">
+                      <div className="h-8 w-24 bg-gray-100 rounded-full animate-pulse" />
+                    </TableCell>
+                    <TableCell className="py-6 px-8 text-right">
+                      <div className="flex justify-end">
+                        <div className="h-10 w-10 bg-gray-100 rounded-xl animate-pulse" />
+                      </div>
+                    </TableCell>
                   </TableRow>
                 ))
               ) : filteredMethods.length === 0 ? (
@@ -353,7 +379,7 @@ export default function ShippingPage() {
             <Button
               onClick={handleDelete}
               disabled={isDeleting}
-              className="flex-1 h-16 rounded-none font-medium text-rose-500 hover:text-rose-600 hover:bg-rose-50 transition-colors"
+              className="flex-1 h-16 bg-primary rounded-none font-medium text-white hover:text-white hover:bg-red-500 transition-colors"
             >
               {isDeleting ? "Deleting..." : "Confirm Delete"}
             </Button>
