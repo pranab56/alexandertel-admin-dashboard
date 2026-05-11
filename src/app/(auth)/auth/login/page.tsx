@@ -9,8 +9,10 @@ import { setAuthCookie } from '@/app/actions/auth';
 import { ArrowRight, Eye, EyeOff } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+import { setAuthenticated } from '@/features/auth/authSlice';
 import { FormEvent, useState } from 'react';
 import toast from 'react-hot-toast';
+import { useDispatch } from 'react-redux';
 
 export default function LoginPage() {
   const [email, setEmail] = useState<string>('');
@@ -19,6 +21,7 @@ export default function LoginPage() {
   const [errors, setErrors] = useState<{ email?: string; password?: string }>({});
   const [login, { isLoading }] = useLoginMutation();
   const router = useRouter();
+  const dispatch = useDispatch();
 
 
   const validate = () => {
@@ -48,6 +51,7 @@ export default function LoginPage() {
     try {
       const res = await login({ email, password }).unwrap();
       toast.success(res.message);
+      dispatch(setAuthenticated(res.data.accessToken));
       await setAuthCookie(res.data.accessToken);
       router.push('/');
     } catch (error: unknown) {
