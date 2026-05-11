@@ -1,1 +1,1 @@
-export const baseURL = process.env.NEXT_PUBLIC_BASE_URL || "http://10.10.7.55:5006";
+export const baseURL = process.env.NEXT_PUBLIC_BASE_URL || "https://hz2w208g-5006.inc1.devtunnels.ms";
